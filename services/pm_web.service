@@ -1,0 +1,11 @@
+[Unit]
+Description=Modem Web Services
+After=multi-user.target
+ 
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/python3 '/opt/ElectricPop/ElectricPop/pm_web.py'
+Restart=on-abort
+ 
+[Install]
+WantedBy=multi-user.target
