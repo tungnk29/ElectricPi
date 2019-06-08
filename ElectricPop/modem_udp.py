@@ -151,7 +151,7 @@ def recv_package(decrespone):
         GPIO.output(swPin, decrespone["switch"])  # set high / low GPIO 12
 
     for f in decrespone['func']:
-        exec(decrespone[f])
+        exec(f)
 
 
 def main():
