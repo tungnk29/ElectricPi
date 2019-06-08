@@ -183,7 +183,10 @@ def main():
             res = res if len(res) > 30 else ''
 
             if res:
-                recv_package(pickle.loads(cipher.decrypt(res[3:])))
+                try:
+                    recv_package(pickle.loads(cipher.decrypt(res[3:])))
+                except Exception as e:
+                    print(e)
             else:
                 pass
 
