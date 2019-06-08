@@ -150,7 +150,7 @@ def recv_package(decrespone):
         '''Dong ngat mach'''
         GPIO.output(swPin, decrespone["switch"])  # set high / low GPIO 12
 
-    for f in decrespone:
+    for f in decrespone['func']:
         exec(decrespone[f])
 
 
