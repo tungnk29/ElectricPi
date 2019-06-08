@@ -4,7 +4,7 @@ After=multi-user.target
  
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/python3 '/opt/ElectricPop/ElectricPop/modem_c.py'
+ExecStart=/usr/local/bin/python3 '/opt/ElectricPi/ElectricPop/modem_c.py'
 Restart=on-abort
  
 [Install]

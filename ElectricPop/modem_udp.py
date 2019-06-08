@@ -31,6 +31,7 @@ GPIO.setup(C_PWpin, GPIO.OUT)
 GPIO.setup(PWKpin, GPIO.OUT)
 GPIO.setup(swPin, GPIO.OUT)
 
+
 # Ham bat/tat modem
 def GSM_Power():
     GPIO.output(PWKpin, 1)
@@ -40,20 +41,22 @@ def GSM_Power():
     print("Switched\n")
     return
 
+
 # Ham khoi tao cho modem
 def GSM_Init():
     print("Khoi tao cho module SIM808... \n")
-    ser.write(b'ATE0\r\n') 				# Tat che do phan hoi (Echo mode)
+    ser.write(b'ATE0\r\n')  # Tat che do phan hoi (Echo mode)
     time.sleep(1)
-    ser.write(b'AT+IPR=9600\r\n') 		# Dat toc do truyen nhan du lieu 9600bps
+    ser.write(b'AT+IPR=9600\r\n')  # Dat toc do truyen nhan du lieu 9600bps
     time.sleep(1)
-    ser.write(b'AT+CMGF=1\r\n')			# Chon che do text mode
+    ser.write(b'AT+CMGF=1\r\n')  # Chon che do text mode
     time.sleep(1)
-    ser.write(b'AT+CNMI=2,2\r\n') 		# Hien thi truc tiep noi dung tin nhan
+    ser.write(b'AT+CNMI=2,2\r\n')  # Hien thi truc tiep noi dung tin nhan
     time.sleep(1)
     ser.write(b'AT+CGNSPWR=1\r\n')  # Bat GPS
     time.sleep(1)
     return
+
 
 # KIem tra xem modem dang bat hay tat cho den khi da bat.
 def GSM_Check():
@@ -72,6 +75,7 @@ def GSM_Check():
         res = ser.readall()
         print(str(res, encoding="latin1"))
 
+
 # Gui tin nhan
 def GSM_MakeSMS(phone, text):
     print("Nhan tin...\n")
@@ -81,6 +85,7 @@ def GSM_MakeSMS(phone, text):
     ser.write(bytes(text, encoding='latin1'))
     ser.write(b'\x1A')  # Gui Ctrl Z hay 26, 0x1A de ket thuc noi dung tin nhan va gui di
     return
+
 
 # Ket noi toi serser
 def SRV_Connect():
@@ -96,6 +101,7 @@ def SRV_Connect():
     res = ser.readall()
     print(str(res, encoding="latin1"))
 
+
 # Gui ban tin den server
 def CIP_Send(packg):
     ser.write(bytes("AT+CIPSEND\r\n", encoding="latin1"))
@@ -104,8 +110,9 @@ def CIP_Send(packg):
     ser.write(b"\x1A")
     print()
 
+
 # Lay cac ban ghi hoac 1 ban ghi trong sqlite
-def getrec(table, mode = False):
+def getrec(table, mode=False):
     db = sql.connect(dbpath)
     db.row_factory = sql.Row
     mouse = db.cursor()
@@ -119,9 +126,9 @@ def getrec(table, mode = False):
     db.close()
     return res
 
+
 # Xu li cac phan hoi tu server
 def recv_package(decrespone):
-
     print(decrespone)
 
     def alarm():
@@ -134,17 +141,18 @@ def recv_package(decrespone):
                 print("Canh bao nguy hiem")
             counter += 1
         elif decrespone.get("alarm") == False:
-                counter = 0
-    
+            counter = 0
+
     def notify():
         GSM_MakeSMS(decrespone["phone"], "Da het su co ! ^ _ ^")
 
     def switch():
         '''Dong ngat mach'''
-        GPIO.output(swPin, decrespone["switch"]) # set high / low GPIO 12
+        GPIO.output(swPin, decrespone["switch"])  # set high / low GPIO 12
 
-    for f in decrespone: 
+    for f in decrespone:
         exec(decrespone[f])
+
 
 def main():
     global connect_counter
@@ -158,7 +166,10 @@ def main():
             pminfo = getrec("powermeter")
             token = getrec("config", True)["token"]
 
-            uicosfi = [register_reading(d["ids"], 2, d["a"], d["a1"], d["a2"], d["a3"], d["vll"], d["vln"], d["v1"], d["v2"], d["v3"], d["v12"], d["v23"], d["v31"], d["pf"], d["pf1"], d["pf2"], d["pf3"]) for d in pminfo]
+            uicosfi = [
+                register_reading(d["ids"], 2, d["a"], d["a1"], d["a2"], d["a3"], d["vll"], d["vln"], d["v1"], d["v2"],
+                                 d["v3"], d["v12"], d["v23"], d["v31"], d["pf"], d["pf1"], d["pf2"], d["pf3"]) for d in
+                pminfo]
             pack2send["record"] = uicosfi
             pack2send["token"] = token
 
@@ -182,10 +193,11 @@ def main():
         ser.write(b"AT+CIPCLOSE\r\n")
         ser.close()
     finally:
-        print("End!\n")       
+        print("End!\n")
         GSM_Power()
         ser.close()
         GPIO.cleanup()
+
 
 if __name__ == "__main__":
     main()

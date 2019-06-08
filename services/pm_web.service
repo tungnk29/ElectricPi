@@ -4,7 +4,7 @@ After=multi-user.target
  
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/python3 '/opt/ElectricPop/ElectricPop/pm_web.py'
+ExecStart=/usr/local/bin/python3 '/opt/ElectricPi/ElectricPop/pm_web.py'
 Restart=on-abort
  
 [Install]
