@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 from module.pmread import register_reading
-from datetime import datetime
+from threading import Thread
 from cryptography.fernet import Fernet
 import sqlite3 as sql
-import os, re, time, serial, pickle, threading
+import os, re, time, serial, pickle
 import RPi.GPIO as GPIO
 
 cwd = os.path.dirname(os.path.realpath(__file__))
@@ -193,7 +193,8 @@ def main():
 
             if res:
                 try:
-                    threading.Thread(target=recv_package, args=(pickle.loads(cipher.decrypt(res[3:])))).start()
+                    decrespone = (pickle.loads(cipher.decrypt(res[3:])))
+                    Thread(target=recv_package, args=decrespone).start()
                 except Exception as e:
                     print('incorect response servver data !')
             else:
