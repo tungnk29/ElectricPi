@@ -13,6 +13,7 @@ key = b'ztpn8wdO3ZNiNW3V9GZJlKWy8RioHnPC5-W5TQ0ZSEM='
 cipher = Fernet(key)
 counter = 0
 connect_counter = 0
+phone = ''
 
 C_PWpin = 27  # chan C_PW dieu khien nguon cap cho RPI Sim808 Shield
 PWKpin = 17  # chan PWK : bat/tat RPI Sim808 Shield
@@ -134,21 +135,26 @@ def recv_package(decrespone):
     def alarm():
         '''Nhan lenh gui tin nhan canh bao'''
         global counter
+        global phone
+        phone = decrespone["phone"]
         print(counter)
         if decrespone.get("alarm") == True:
             if counter % 4 == 0:
-                GSM_MakeSMS(decrespone["phone"], "Canh bao! Co su co !!!")
+                GSM_MakeSMS(phone, "Canh bao! Co su co !!!")
                 print("Canh bao nguy hiem")
             counter += 1
-        elif decrespone.get("alarm") == False:
-            counter = 0
 
-    def notify():
-        GSM_MakeSMS(decrespone["phone"], "Da het su co ! ^ _ ^")
+    def notify(phone):
+        GSM_MakeSMS(phone, "Da het su co ! ^ _ ^")
 
     def switch():
+        global phone
         '''Dong ngat mach'''
         GPIO.output(swPin, decrespone["switch"])  # set high / low GPIO 12
+
+        if not decrespone.get("alarm", 0):
+            if counter > 0 and counter % 4 != 0:
+                notify(phone=phone)
 
     for f in decrespone['func']:
         exec(f)
