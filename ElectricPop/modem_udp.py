@@ -153,6 +153,7 @@ def recv_package(decrespone):
         GPIO.output(swPin, decrespone["switch"])  # set high / low GPIO 12
 
         if not decrespone.get("alarm", 0):
+            print(phone)
             if counter > 0 and counter % 4 != 0:
                 notify(phone=phone)
 
