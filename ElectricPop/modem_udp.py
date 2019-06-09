@@ -149,12 +149,13 @@ def recv_package(decrespone):
 
     def switch():
         global phone
+        global counter
         '''Dong ngat mach'''
         GPIO.output(swPin, decrespone["switch"])  # set high / low GPIO 12
 
         if not decrespone.get("alarm", 0):
-            print(phone)
             if counter > 0 and counter % 4 != 0:
+                print(phone)
                 notify(phone=phone)
 
     for f in decrespone['func']:
