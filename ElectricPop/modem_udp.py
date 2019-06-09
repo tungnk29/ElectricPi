@@ -157,6 +157,7 @@ def recv_package(decrespone):
             if counter > 0 and counter % 4 != 0:
                 print(phone)
                 notify(phone=phone)
+                counter = 0
 
     for f in decrespone['func']:
         exec(f)
