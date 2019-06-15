@@ -196,11 +196,17 @@ def main():
                     decrespone = pickle.loads(cipher.decrypt(res[3:]))
                     Thread(target=recv_package, args=(decrespone,)).start()
                 except Exception as e:
-                    print('incorect response servver data !')
+                    print('incorect response server data !')
+                finally:
+                    connect_counter = 0
             else:
-                pass
+                connect_counter += 1
 
             print("Time Counter Per Send: {}s".format(time.time() - x_start))
+
+            if connect_counter >= 5:
+                SRV_Connect()
+                connect_counter = 0
 
     except KeyboardInterrupt:
         ser.write(b"AT+CIPCLOSE\r\n")
@@ -209,7 +215,7 @@ def main():
         print("End!\n")
         GSM_Power()
         ser.close()
-        GPIO.cleanup()
+        GPIO.cleanup((27,17))
 
 
 if __name__ == "__main__":
