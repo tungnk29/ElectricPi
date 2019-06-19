@@ -169,8 +169,8 @@ def main():
                 print('error to decode data from server !')
 
             time.sleep(1)
-        except KeyboardInterrupt:
-            print('Cancel by keyboard')
+    except KeyboardInterrupt:
+        print('Cancel by keyboard')
             
 if __name__ == '__main__':
     main()
