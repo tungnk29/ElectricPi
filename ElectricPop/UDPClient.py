@@ -155,21 +155,22 @@ def uicosfi_package(token):
 def main():
     config = getrec("config", True)
     srv_info = (config["server"], config["port"])
-    while True:
-        x_start = time.time()
-        s.sendto(uicosfi_package(config['token']), srv_info)
-        try:
-            res = s.recvfrom(1024)
-            data = pickle.loads(cipher.decrypt(res[3:]))
-            recv_package(data)
-        except socket.timeout:
-            print('Time out to receive data from server ! Try again !')
+    try:
+        while True:
+            x_start = time.time()
+            s.sendto(uicosfi_package(config['token']), srv_info)
+            try:
+                res = s.recvfrom(4096)
+                data = pickle.loads(cipher.decrypt(res[3:]))
+                recv_package(data)
+            except socket.timeout:
+                print('Time out to receive data from server ! Try again !')
+            except Exception:
+                print('error to decode data from server !')
+
+            time.sleep(1)
         except KeyboardInterrupt:
             print('Cancel by keyboard')
-        except Exception:
-            print('error to decode data from server !')
-
-        time.sleep(1)
             
 if __name__ == '__main__':
     main()

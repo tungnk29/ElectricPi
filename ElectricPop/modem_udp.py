@@ -215,7 +215,7 @@ def main():
         print("End!\n")
         GSM_Power()
         ser.close()
-        GPIO.cleanup((27,17))
+        GPIO.cleanup()
 
 
 if __name__ == "__main__":
