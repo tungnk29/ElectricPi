@@ -161,8 +161,9 @@ def main():
             s.sendto(uicosfi_package(config['token']), srv_info)
             try:
                 res = s.recvfrom(4096)
-                data = pickle.loads(cipher.decrypt(res[3:]))
-                recv_package(data)
+                # data = pickle.loads(cipher.decrypt(res[3:]))
+                # recv_package(data)
+                print(res)
             except socket.timeout:
                 print('Time out to receive data from server ! Try again !')
             except Exception:
