@@ -170,7 +170,7 @@ def main():
             except Exception:
                 print('error to decode data from server !')
 
-            # time.sleep(1)
+            time.sleep(0.5)
     except KeyboardInterrupt:
         print('Cancel by keyboard')
             
