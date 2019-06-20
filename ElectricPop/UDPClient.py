@@ -155,6 +155,7 @@ def uicosfi_package(token):
 def main():
     config = getrec("config", True)
     srv_info = (config["server"], config["port"])
+    GSM_Check()
     try:
         while True:
             x_start = time.time()
