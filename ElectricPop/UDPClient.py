@@ -169,6 +169,9 @@ def main():
                 print('Time out to receive data from server ! Try again !')
             except Exception:
                 print('error to decode data from server !')
+            except KeyboardInterrupt:
+                print('Cancel by keyboard')
+                break
 
             time.sleep(0.5)
     except KeyboardInterrupt:
