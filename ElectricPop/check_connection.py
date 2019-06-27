@@ -38,22 +38,25 @@ def switch_udpsocket():
 def main():
     global status
     while True:
-        if is_connected() and status:
-            print('Pass...')
-        else:
-            if not is_connected():
-                if status:
-                    status = False
-                    switch_modem()
-                    print('No UDP connection...!')
-                print('Switched to Modem...')
-            elif is_connected() and not status:
-                switch_udpsocket()
-                print('Return to UDP connection !')
-                status = True
+        try:
+            if is_connected() and status:
+                print('Pass...')
             else:
-                print('Nop...!')
-        time.sleep(1)
+                if not is_connected():
+                    if status:
+                        status = False
+                        switch_modem()
+                        print('No UDP connection...!')
+                    print('Switched to Modem...')
+                elif is_connected() and not status:
+                    switch_udpsocket()
+                    print('Return to UDP connection !')
+                    status = True
+                else:
+                    print('Nop...!')
+            time.sleep(1)
+        except:
+            print('stop check connection')
 
 if __name__ == '__main__':
     main()

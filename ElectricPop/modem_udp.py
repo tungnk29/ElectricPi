@@ -15,9 +15,12 @@ counter = 0
 connect_counter = 0
 phone = ''
 
+# GPIO pin number
 C_PWpin = 27  # chan C_PW dieu khien nguon cap cho RPI Sim808 Shield
 PWKpin = 17  # chan PWK : bat/tat RPI Sim808 Shield
 swPin = 12  # chan swPin dong ngat relay
+swPinOff = 16 # chan swPinOff ngat relay
+statusPin = 18 # chan tiep diem doc trang thai
 
 # Cai dat cong ket noi Serial
 ser = serial.Serial(port='/dev/ttyS0',
@@ -31,6 +34,8 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(C_PWpin, GPIO.OUT)
 GPIO.setup(PWKpin, GPIO.OUT)
 GPIO.setup(swPin, GPIO.OUT)
+GPIO.setup(swPinOff, GPIO.OUT)
+GPIO.setup(statusPin, GPIO.IN)
 
 
 # Ham bat/tat modem
@@ -42,6 +47,24 @@ def GSM_Power():
     print("Switched\n")
     return
 
+# read status contact pin 
+def read_status_pin():
+    return GPIO.input(statusPin)
+
+# switch on pop
+def switch_pop(boolean = 1):
+    if boolean:
+        GPIO.output(swPin, 1)
+        time.sleep(2)
+        GPIO.output(swPin, 0)
+        time.sleep(2)
+    else:
+        GPIO.output(swPinOff, 1)
+        time.sleep(2)
+        GPIO.output(swPinOff, 0)
+        time.sleep(2)
+
+    print('Pop status switched\n')
 
 # Ham khoi tao cho modem
 def GSM_Init():
@@ -134,8 +157,7 @@ def recv_package(decrespone):
 
     def alarm():
         '''Nhan lenh gui tin nhan canh bao'''
-        global counter
-        global phone
+        global counter, phone
         phone = decrespone["phone"]
         print(counter)
         if decrespone.get("alarm") == True:
@@ -148,10 +170,13 @@ def recv_package(decrespone):
         GSM_MakeSMS(phone, "Da het su co ! ^ _ ^")
 
     def switch():
-        global phone
-        global counter
         '''Dong ngat mach'''
-        GPIO.output(swPin, decrespone["switch"])  # set high / low GPIO 12
+
+        global phone, counter
+
+        # execute switch on/off
+        if decrespone["switch"] != GPIO.input(18):
+            switch_pop(decrespone["switch"])
 
         if not decrespone.get("alarm", 0):
             if counter > 0 and counter % 4 != 0:
