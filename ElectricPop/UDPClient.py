@@ -33,10 +33,6 @@ counter = 0
 connect_counter = 0
 phone = ''
 
-# Server infomation
-config = getrec("config", True)
-srv_info = (config["server"], config["port"])
-
 # Setup GPIO mode
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(C_PWpin, GPIO.OUT)
@@ -62,6 +58,10 @@ def getrec(table, mode=False):
         res = dict(rows)
     db.close()
     return res
+
+# Server infomation
+config = getrec("config", True)
+srv_info = (config["server"], config["port"])
 
 # reload server info
 def srv_info_reload():
