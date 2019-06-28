@@ -207,6 +207,7 @@ def main():
             pack2send["record"] = uicosfi
             pack2send["token"] = token
             pack2send["temperature"] = sensor_reading()
+            pack2send["real_status"] = read_status_pin()
 
             packg = pickle.dumps(pack2send)
 
