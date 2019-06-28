@@ -49,6 +49,20 @@ GPIO.setup(statusPin, GPIO.IN)
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.settimeout(3)
 
+def getrec(table, mode=False):
+    db = sql.connect(dbpath)
+    db.row_factory = sql.Row
+    mouse = db.cursor()
+    mouse.execute("SELECT * FROM {}".format(table))
+    if not mode:
+        rows = mouse.fetchall()
+        res = [dict(d) for d in rows]
+    else:
+        rows = mouse.fetchone()
+        res = dict(rows)
+    db.close()
+    return res
+
 # reload server info
 def srv_info_reload():
     global config, srv_info
@@ -126,20 +140,6 @@ def GSM_MakeSMS(phone, text):
     ser.write(b'\x1A')  # Gui Ctrl Z hay 26, 0x1A de ket thuc noi dung tin nhan va gui di
     return
 
-
-def getrec(table, mode=False):
-    db = sql.connect(dbpath)
-    db.row_factory = sql.Row
-    mouse = db.cursor()
-    mouse.execute("SELECT * FROM {}".format(table))
-    if not mode:
-        rows = mouse.fetchall()
-        res = [dict(d) for d in rows]
-    else:
-        rows = mouse.fetchone()
-        res = dict(rows)
-    db.close()
-    return res
 
 # Xu li cac phan hoi tu server
 def recv_package(decrespone):
