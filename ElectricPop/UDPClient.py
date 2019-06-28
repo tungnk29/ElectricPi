@@ -1,4 +1,4 @@
-from module.pmread import register_reading
+from module.pmread import register_reading, sensor_reading
 from threading import Thread
 from cryptography.fernet import Fernet
 import sqlite3 as sql
@@ -184,6 +184,7 @@ def uicosfi_package(token):
     uicosfi = [register_reading(d["ids"], 2, d["a"], d["a1"], d["a2"], d["a3"], d["vll"], d["vln"], d["v1"], d["v2"],d["v3"], d["v12"], d["v23"], d["v31"], d["pf"], d["pf1"], d["pf2"], d["pf3"]) for d in pminfo]
     pack2send["record"] = uicosfi
     pack2send["token"] = token
+    pack2send["temperature"] = sensor_reading()
 
     packg = b'808' + cipher.encrypt(pickle.dumps(pack2send))
     return packg

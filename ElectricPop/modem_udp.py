@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-from module.pmread import register_reading
+from module.pmread import register_reading, sensor_reading
 from threading import Thread
 from cryptography.fernet import Fernet
 import sqlite3 as sql
@@ -206,6 +206,7 @@ def main():
                 pminfo]
             pack2send["record"] = uicosfi
             pack2send["token"] = token
+            pack2send["temperature"] = sensor_reading()
 
             packg = pickle.dumps(pack2send)
 

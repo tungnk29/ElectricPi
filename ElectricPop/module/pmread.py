@@ -2,6 +2,15 @@
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadDecoder
+from w1thermsensor import W1ThermSensor
+
+def sensor_reading():
+    try:
+        sensor = W1ThermSensor()
+        return sensor.get_temperature()
+    except:
+        return None
+
 
 def validator(instance):
     '''Decode raw data from register'''
