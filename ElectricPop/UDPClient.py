@@ -195,7 +195,7 @@ def main():
     global srv_info, config
     try:
         while True:
-            # srv_info_reload()
+            srv_info_reload()
             x_start = time.time()
             s.sendto(uicosfi_package(config['token']), srv_info)
             try:
@@ -204,7 +204,7 @@ def main():
                 recv_package(data)
                 # print(res)
             except socket.timeout:
-                srv_info_reload()
+                # srv_info_reload()
                 print('Time out to receive data from server ! Try again !')
             except KeyboardInterrupt:
                 print('Cancel by keyboard')

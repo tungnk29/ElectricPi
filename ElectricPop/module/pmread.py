@@ -75,6 +75,8 @@ def register_reading(ids, count, *args):
         modbus.close()
 
         return {"ids": ids, "a":a, "a1":a1, "a2":a2, "a3":a3, "vll":vll, "vln":vln, "v1":v1, "v2":v2, "v3":v3, "v12":v12, "v23":v23, "v31":v31, "pf": pf, "pf1":pf1, "pf2":pf2, "pf3":pf3}
+    except KeyboardInterrupt:
+        print('Ctrl + C pressed !')
     except:
         print("Error!")
         return {"ids": 0, "a":0, "a1":0, "a2":0, "a3":0, "vll":0, "vln":0, "v1":0, "v2":0, "v3":0, "v12":0, "v23":0, "v31":0, "pf": 0, "pf1":0, "pf2":0, "pf3":0}
