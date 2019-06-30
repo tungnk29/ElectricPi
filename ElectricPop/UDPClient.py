@@ -195,7 +195,7 @@ def main():
     global srv_info, config
     try:
         while True:
-            srv_info_reload()
+            # srv_info_reload()
             x_start = time.time()
             s.sendto(uicosfi_package(config['token']), srv_info)
             try:
@@ -215,6 +215,9 @@ def main():
             time.sleep(0.5)
     except KeyboardInterrupt:
         print('Cancel by keyboard')
+    except socket.gaierror:
+        print('Wrong server info !')
+
             
 if __name__ == '__main__':
     main()
