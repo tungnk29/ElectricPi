@@ -195,11 +195,15 @@ def main():
     global srv_info, config
     try:
         while True:
-            srv_info_reload()
-            x_start = time.time()
-            s.sendto(uicosfi_package(config['token']), srv_info)
             try:
+                srv_info_reload()
+
+                x_start = time.time()
+                
+                s.sendto(uicosfi_package(config['token']), srv_info)
+
                 res = s.recvfrom(4096)
+
                 data = pickle.loads(cipher.decrypt(res[0][3:]))
                 recv_package(data)
                 # print(res)
