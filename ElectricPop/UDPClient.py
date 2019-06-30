@@ -192,6 +192,7 @@ def uicosfi_package(token):
 
 def main():
     GSM_Check()
+    global srv_info
     try:
         while True:
             x_start = time.time()
