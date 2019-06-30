@@ -208,15 +208,15 @@ def main():
                 print('Time out to receive data from server ! Try again !')
             except KeyboardInterrupt:
                 print('Cancel by keyboard')
-                break                
+                break
+            except socket.gaierror:
+                print('Wrong server info !')                
             except Exception:
                 print('error to decode data from server !')
 
             time.sleep(0.5)
     except KeyboardInterrupt:
         print('Cancel by keyboard')
-    except socket.gaierror:
-        print('Wrong server info !')
 
             
 if __name__ == '__main__':
