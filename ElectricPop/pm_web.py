@@ -110,7 +110,7 @@ def delete():
     finally:
         db.close()
 
-    return json.dumps({'status': False, 'delete': 'Ok'})
+    return json.dumps({'status': True, 'delete': 'Ok'})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)

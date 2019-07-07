@@ -50,8 +50,8 @@ $(document).ready(function () {
         '                        <input type="button" class="button pmbutton" name="save" value="Save">\n' +
         '                </form>');
 
-    let temp = parseInt($('#temperature').val());
-    let net = $('#network').val();
+    let temp = parseInt($('#temperature').text());
+    let net = $('#network').text();
 
     if (temp <= 40) {
         $('#temperature').css('color', 'green');
