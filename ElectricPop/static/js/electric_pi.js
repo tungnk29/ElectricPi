@@ -56,12 +56,12 @@ $(document).ready(function () {
     if (temp <= 40) {
         $('#temperature').css('color', 'green');
     } else if (temp > 40 && temp <= 60) {
-        $('#temperature').css('color', 'yellow');
+        $('#temperature').css('color', 'orange');
     } else {
         $('#temperature').css('color', 'red');
     }
 
-    if (temp == 'True') {
+    if (net == 'True') {
         $('#network').css('color', 'green');
     } else {
         $('#network').css('color', 'red');
