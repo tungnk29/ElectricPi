@@ -1,6 +1,7 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, render_template, redirect, url_for, request, json
+from module.pmread import sensor_reading, is_connected
 import sqlite3 as sql
 import os, re
 app = Flask(__name__)
@@ -30,6 +31,9 @@ def index():
     token = table["token"]
 
     pmtab = getrec("powermeter")
+
+    temperature = sensor_reading()
+    connected = is_connected()
 
     return render_template("config.html", **locals())
 
@@ -82,11 +86,14 @@ def save():
             else:
             	mouse.execute("INSERT INTO powermeter (ids, a, a1, a2, a3, vll, vln, v1, v2, v3, v12, v23, v31, pf, pf1, pf2, pf3) VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})".format(regf["IDSLAVE"], regf["A"], regf["A1"], regf["A2"], regf["A3"], regf["VLL"], regf["VLN"], regf["V1"], regf["V2"], regf["V3"], regf["V12"], regf["V23"], regf["V31"], regf["PF"], regf["PF1"], regf["PF2"], regf["PF3"]))
             db.commit()
+            return json.dumps({'status': True})
         except:
             db.rollback()
             print("Error :(")
-    db.close()
-    return redirect(url_for("index"))
+        finally:
+            db.close()
+
+    return json.dumps({'status': False})
 
 @app.route("/delete", methods=["POST"])
 def delete():
@@ -96,12 +103,14 @@ def delete():
     try:
         mouse.execute("DELETE FROM powermeter WHERE id = {}".format(request.form["id"]))
         db.commit()
+        return json.dumps({'status': True, 'delete': 'Ok'})
     except:
         db.rollback()
         print("Error :(")
-    db.close()
+    finally:
+        db.close()
 
-    return redirect(url_for("index"))
+    return json.dumps({'status': False, 'delete': 'Ok'})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8080)

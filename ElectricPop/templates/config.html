@@ -3,81 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Config - Electric Meter</title>
-    <script type="text/javascript">
-        function addRegisters() {
-            var row01 = [
-                ["4", "I"],
-                ["8", "U"],
-                ["4", "Cosfi"]
-            ];
-
-            var row02 = [
-              "A", "A1", "A2", "A3", "VLL", "VLN", "V1", "V2", "V3", "V12", "V23", "V31", "PF", "PF1", "PF2", "PF3"
-            ];
-
-            var wrap = document.getElementById("wraptop");
-
-            var newForm = document.createElement("form");
-            newForm.setAttribute("method", "POST");// tao form
-
-            var newButton = document.createElement("input");
-            newButton.setAttribute("type", "submit");
-            newButton.setAttribute("class", "button");
-            newButton.setAttribute("value", "Delete");
-            newButton.setAttribute("formaction", "/delete");
-
-            var newButton2 = document.createElement("input");
-            newButton2.setAttribute("type", "submit");
-            newButton2.setAttribute("class", "button");
-            newButton2.setAttribute("value", "Save");
-            newButton2.setAttribute("formaction", "/save");
-
-            var newTable = document.createElement("table"); // tao bang
-            newTable.setAttribute("border", 1);
-
-            var firstTr = document.createElement("tr"); // tao hang 1
-            for (let i = 0; i <= 2; i++) {
-                let thTitle = document.createElement("th"); // tao cot
-                thTitle.setAttribute("colspan", row01[i][0]);
-                let content = document.createTextNode(row01[i][1]);
-                thTitle.appendChild(content);
-                firstTr.appendChild(thTitle);
-            }
-
-            var secTr = document.createElement("tr"); // tao hang 2
-            for (let i = 0; i < row02.length; i++) {
-                let tdCol = document.createElement("td");
-                let inputTag = document.createElement("input");
-                inputTag.setAttribute("type", "text");
-                inputTag.setAttribute("name", row02[i]);
-                inputTag.setAttribute("placeholder", row02[i]);
-                inputTag.setAttribute("class", "textbox register");
-                tdCol.appendChild(inputTag);
-                secTr.appendChild(tdCol)
-            }
-
-            var thirdTr = document.createElement("tr"); // tao hang 3
-            var idsTd = document.createElement("td");
-            idsTd.setAttribute("colspan", "16");
-            var idsInput = document.createElement("input");
-            idsInput.setAttribute("type", "text");
-            idsInput.setAttribute("name", "IDSLAVE");
-            idsInput.setAttribute("placeholder", "ID Slave");
-            idsInput.setAttribute("class", "textbox");
-            idsTd.appendChild(idsInput);
-            thirdTr.appendChild(idsTd);
-
-            newTable.appendChild(firstTr);
-            newTable.appendChild(secTr);
-            newTable.appendChild(thirdTr);
-
-            newForm.appendChild(newTable);
-            newForm.appendChild(newButton);
-            newForm.appendChild(newButton2);
-
-            wrap.appendChild(newForm);
-        }
-    </script>
+    <script src="static/js/jquery-3.4.1.min.js"></script>
+    <script src="static/js/electric_pi.js"> </script>
     <style type="text/css">
         #wrapper {
             width: auto;
@@ -86,14 +13,15 @@
             margin: auto;
             border: 1px solid #000;
             border-radius: 5px;
-            position:absolute;
-            top:50%;
-            left:50%;
-            padding:15px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            padding: 15px;
             -ms-transform: translateX(-50%) translateY(-50%);
-            -webkit-transform: translate(-50%,-50%);
-            transform: translate(-50%,-50%);
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
         }
+
         #srvform {
             margin: auto;
         }
@@ -106,6 +34,7 @@
             margin-bottom: 5px;
             text-align: center;
         }
+
         .button {
             width: 100px;
             background: #65c1ff;
@@ -114,6 +43,7 @@
             padding: 5px;
             margin-bottom: 10px;
         }
+
         .button:hover {
             background: #3187ff;
         }
@@ -123,90 +53,113 @@
             border-radius: 5px;
             text-align: center;
         }
+
         .register {
             width: 30px;
         }
     </style>
 </head>
 <body>
-    <div id="wrapper">
-        <div id="wraptop">
-            <h3>Server configuration</h3>
+<div id="wrapper">
+    <div id="wraptop">
+        <h3>Server configuration</h3>
+        <h2>Temperature: {{ temperature }} *C | Networking: {{ connected }}</h2>
+        <form method="POST">
+            <table border="0" cellpadding="5" cellspacing="5" id="srvform">
+                <tr>
+                    <th>IP/Domain</th>
+                    <th>Port</th>
+                    <th>Token</th>
+                </tr>
+                <tr>
+                    <td><input type="text" name="server" value={{ server }} placeholder="Domain/IP" class="textbox">
+                    </td>
+                    <td><input type="text" name="port" value={{ port }} placeholder="Port" class="textbox"></td>
+                    <td><input type="text" name="token" value={{ token }} placeholder="Token" class="textbox"></td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align: center;"><input type="submit" formaction="/srvsetup" value="Save"
+                                                                       class="button"></td>
+                </tr>
+            </table>
+        </form>
+        <h3>Power Meter - Registers</h3>
+
+        {% for key in pmtab %}
             <form method="POST">
-                <table border="0" cellpadding="5" cellspacing="5" id="srvform">
+                <input type="hidden" name="id" value={{ key["id"] }}>
+                <table border="1">
                     <tr>
-                        <th>IP/Domain</th>
-                        <th>Port</th>
-                        <th>Token</th>
+                        <th colspan="4">I</th>
+                        <th colspan="8">U</th>
+                        <th colspan="4">Cosfi</th>
                     </tr>
                     <tr>
-                        <td><input type="text" name="server" value={{ server }} placeholder="Domain/IP" class="textbox"></td>
-                        <td><input type="text" name="port" value={{ port }} placeholder="Port" class="textbox"></td>
-                        <td><input type="text" name="token" value={{ token }} placeholder="Token" class="textbox"></td>
+                        <th>A</th>
+                        <th>A1</th>
+                        <th>A2</th>
+                        <th>A3</th>
+                        <th>VLL</th>
+                        <th>VLN</th>
+                        <th>V1</th>
+                        <th>V2</th>
+                        <th>V3</th>
+                        <th>V12</th>
+                        <th>V23</th>
+                        <th>V31</th>
+                        <th>PF</th>
+                        <th>PF1</th>
+                        <th>PF2</th>
+                        <th>PF3</th>
                     </tr>
                     <tr>
-                        <td colspan = "3" style="text-align: center;"><input type="submit" formaction="/srvsetup" value="Save" class="button"></td>
+                        <td><input type="text" name="A" value={{ key["a"] }} placeholder="A" class="textbox register">
+                        </td>
+                        <td><input type="text" name="A1" value={{ key["a1"] }} placeholder="A1"
+                                   class="textbox register"></td>
+                        <td><input type="text" name="A2" value={{ key["a2"] }} placeholder="A2"
+                                   class="textbox register"></td>
+                        <td><input type="text" name="A3" value={{ key["a3"] }} placeholder="A3"
+                                   class="textbox register"></td>
+                        <td><input type="text" name="VLL" value={{ key["vll" ] }} placeholder="VLL"
+                                   class="textbox register"></td>
+                        <td><input type="text" name="VLN" value={{ key["vln"] }} placeholder="VLN"
+                                   class="textbox register"></td>
+                        <td><input type="text" name="V1" value={{ key["v1"] }} placeholder="V1"
+                                   class="textbox register"></td>
+                        <td><input type="text" name="V2" value={{ key["v2"] }} placeholder="V2"
+                                   class="textbox register"></td>
+                        <td><input type="text" name="V3" value={{ key["v3"] }} placeholder="V3"
+                                   class="textbox register"></td>
+                        <td><input type="text" name="V12" value={{ key["v12"] }} placeholder="V12"
+                                   class="textbox register"></td>
+                        <td><input type="text" name="V23" value={{ key["v23"] }} placeholder="V23"
+                                   class="textbox register"></td>
+                        <td><input type="text" name="V31" value={{ key["v31"] }} placeholder="V31"
+                                   class="textbox register"></td>
+                        <td><input type="text" name="PF" value={{ key["pf"] }} placeholder="PF"
+                                   class="textbox register"></td>
+                        <td><input type="text" name="PF1" value={{ key["pf1"] }} placeholder="PF1"
+                                   class="textbox register"></td>
+                        <td><input type="text" name="PF2" value={{ key["pf2"] }} placeholder="PF2"
+                                   class="textbox register"></td>
+                        <td><input type="text" name="PF3" value={{ key["pf3"] }} placeholder="PF3"
+                                   class="textbox register"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="16"><input type="text" name="IDSLAVE" value={{ key["ids"] }} placeholder="IDSlave" class="textbox">
+                        </td>
                     </tr>
                 </table>
+                <input type="button" class="button pmbutton" name="delete" value="Delete">
+                <input type="button" class="button pmbutton" name="save" value="Save">
             </form>
-            <h3>Power Meter - Registers</h3>
+        {% endfor %}
 
-            {% for key in pmtab %}
-                <form method="POST">
-						<input type="hidden" name="id" value={{ key["id"] }} />
-                        <table border="1">
-                            <tr>
-                                <th colspan="4">I</th>
-                                <th colspan="8">U</th>
-                                <th colspan="4">Cosfi</th>
-                            </tr>
-                            <tr>
-                                <th>A</th>
-                                <th>A1</th>
-                                <th>A2</th>
-                                <th>A3</th>
-                                <th>VLL</th>
-                                <th>VLN</th>
-                                <th>V1</th>
-                                <th>V2</th>
-                                <th>V3</th>
-                                <th>V12</th>
-                                <th>V23</th>
-                                <th>V31</th>
-                                <th>PF</th>
-                                <th>PF1</th>
-                                <th>PF2</th>
-                                <th>PF3</th>
-                            </tr>
-                            <tr>
-                                <td><input type="text" name="A" value={{ key["a"] }} placeholder="A" class="textbox register"></td>
-                                <td><input type="text" name="A1" value={{ key["a1"] }} placeholder="A1" class="textbox register"></td>
-                                <td><input type="text" name="A2" value={{ key["a2"] }} placeholder="A2" class="textbox register"></td>
-                                <td><input type="text" name="A3" value={{ key["a3"] }} placeholder="A3" class="textbox register"></td>
-                                <td><input type="text" name="VLL" value={{ key["vll" ]}} placeholder="VLL" class="textbox register"></td>
-                                <td><input type="text" name="VLN" value={{ key["vln"] }} placeholder="VLN" class="textbox register"></td>
-                                <td><input type="text" name="V1" value={{ key["v1"] }} placeholder="V1" class="textbox register"></td>
-                                <td><input type="text" name="V2" value={{ key["v2"] }} placeholder="V2" class="textbox register"></td>
-                                <td><input type="text" name="V3" value={{ key["v3"] }} placeholder="V3" class="textbox register"></td>
-                                <td><input type="text" name="V12" value={{ key["v12"] }} placeholder="V12" class="textbox register"></td>
-                                <td><input type="text" name="V23" value={{ key["v23"] }} placeholder="V23" class="textbox register"></td>
-                                <td><input type="text" name="V31" value={{ key["v31"] }} placeholder="V31" class="textbox register"></td>
-                                <td><input type="text" name="PF" value={{ key["pf"] }} placeholder="PF" class="textbox register"></td>
-                                <td><input type="text" name="PF1" value={{ key["pf1"] }} placeholder="PF1" class="textbox register"></td>
-                                <td><input type="text" name="PF2" value={{ key["pf2"] }} placeholder="PF2" class="textbox register"></td>
-                                <td><input type="text" name="PF3" value={{ key["pf3"] }} placeholder="PF3" class="textbox register"></td>
-                            </tr>
-                            <tr>
-                                <td colspan="16"><input type="text" name="IDSLAVE" value={{ key["ids"] }} placeholder="ID Slave" class="textbox"></td>
-                            </tr>
-                        </table>
-                        <input type="submit" class="button" value="Delete" formaction="/delete">
-                        <input type="submit" class="button" value="Save" formaction="/save">
-                </form>
-            {% endfor %}
-
-        </div>
-        <p style="text-align: center;"><button onclick="addRegisters()" class="button">Add Register</button></p>
     </div>
+    <p style="text-align: center;">
+        <button class="button addreg">Add Register</button>
+    </p>
+</div>
 </body>
 </html>

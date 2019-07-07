@@ -3,6 +3,32 @@ from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadDecoder
 from w1thermsensor import W1ThermSensor
+import socket, os, re, subprocess
+
+cwd = os.path.dirname(os.path.realpath(__file__))
+
+def get_modbus_path():
+    shell_path = cwd + '/mbdevice.sh'
+
+    cmd = subprocess.Popen("bash " + shell_path, stdout=subprocess.PIPE, shell=True)
+
+    (result, err) = cmd.communicate()
+
+    result = str(result, encoding='utf-8')
+
+    device_path = re.search(r'ttyUSB\d+', result).group()
+
+    return '/dev/' + device_path
+
+
+def is_connected():
+    try:
+        c = socket.create_connection(('8.8.8.8', 53), 2)
+        c.close()
+        return True
+    except:
+        pass
+    return False
 
 def sensor_reading():
     try:
@@ -31,7 +57,7 @@ def register_reading(ids, count, *args):
     rgs = list(args)
     print("Start reading Power Meter...")
     try:
-        modbus = ModbusClient(method='rtu', port='/dev/ttyUSB0', baudrate=9600, timeout=1, parity='E', bytesize=8)
+        modbus = ModbusClient(method='rtu', port=get_modbus_path(), baudrate=9600, timeout=1, parity='E', bytesize=8)
         modbus.connect()
 
         a = validator(modbus.read_holding_registers(rgs[0] - 1, count, unit=ids))

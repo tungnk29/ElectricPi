@@ -1,17 +1,8 @@
 #!/usr/bin/python3
-import socket
+from module.pmread import is_connected
 import time
 import os
 status = True
-
-def is_connected():
-    try:
-        c = socket.create_connection(('8.8.8.8', 53), 2)
-        c.close()
-        return True
-    except:
-        pass
-    return False
 
 def switch_modem():
     # stop UDP client service
