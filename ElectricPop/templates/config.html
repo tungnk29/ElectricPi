@@ -26,7 +26,7 @@
             margin: auto;
         }
 
-        h3 {
+        h3, h4 {
             text-align: center;
         }
 
@@ -63,7 +63,7 @@
 <div id="wrapper">
     <div id="wraptop">
         <h3>Server configuration</h3>
-        <h2>Temperature: {{ temperature }} *C | Networking: {{ connected }}</h2>
+        <h4>Temperature: <span id='temperature'>{{ temperature }}</span> °C | Networking: <span id='network'>{{ connected }}</span></h4>
         <form method="POST">
             <table border="0" cellpadding="5" cellspacing="5" id="srvform">
                 <tr>

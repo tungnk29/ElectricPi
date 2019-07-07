@@ -49,6 +49,24 @@ $(document).ready(function () {
         '                        <input type="button" class="button pmbutton" name="delete" value="Delete">\n' +
         '                        <input type="button" class="button pmbutton" name="save" value="Save">\n' +
         '                </form>');
+
+    let temp = parseInt($('#temperature').val());
+    let net = $('#network').val();
+
+    if (temp <= 40) {
+        $('#temperature').css('color', 'green');
+    } else if (temp > 40 && temp <= 60) {
+        $('#temperature').css('color', 'yellow');
+    } else {
+        $('#temperature').css('color', 'red');
+    }
+
+    if (temp == 'True') {
+        $('#network').css('color', 'green');
+    } else {
+        $('#network').css('color', 'red');
+    }
+
     $('body').on('click', '.addreg', function () {
         $('#wraptop').append(newPowerMeter);
     });
