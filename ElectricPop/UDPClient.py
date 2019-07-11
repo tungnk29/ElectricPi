@@ -185,7 +185,7 @@ def uicosfi_package(token):
     return packg
 
 def main():
-    GSM_Check()
+    # GSM_Check()
     global srv_info, config
     try:
         while True:
