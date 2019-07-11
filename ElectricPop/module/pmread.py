@@ -2,8 +2,7 @@
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadDecoder
-from w1thermsensor import W1ThermSensor
-import socket, os, re, subprocess
+import socket, os, re, subprocess, psutil
 
 cwd = os.path.dirname(os.path.realpath(__file__))
 
@@ -31,11 +30,7 @@ def is_connected():
     return False
 
 def sensor_reading():
-    try:
-        sensor = W1ThermSensor()
-        return sensor.get_temperature()
-    except:
-        return None
+    return psutil.sensors_temperatures()['cpu-thermal'][0].current
 
 
 def validator(instance):

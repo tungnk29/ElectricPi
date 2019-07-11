@@ -6,12 +6,12 @@ import os, re, time, serial, pickle, socket
 import RPi.GPIO as GPIO
 
 # Cai dat cong ket noi Serial
-ser = serial.Serial(port='/dev/ttyS0',
-                    baudrate=9600,
-                    parity=serial.PARITY_NONE,
-                    stopbits=serial.STOPBITS_ONE,
-                    bytesize=serial.EIGHTBITS,
-                    timeout=1)
+# ser = serial.Serial(port='/dev/ttyS0',
+#                     baudrate=9600,
+#                     parity=serial.PARITY_NONE,
+#                     stopbits=serial.STOPBITS_ONE,
+#                     bytesize=serial.EIGHTBITS,
+#                     timeout=1)
 
 # path to config file
 cwd = os.path.dirname(os.path.realpath(__file__))
@@ -22,8 +22,8 @@ key = b'ztpn8wdO3ZNiNW3V9GZJlKWy8RioHnPC5-W5TQ0ZSEM='
 cipher = Fernet(key)
 
 # Pin GPIO and setup
-C_PWpin = 27  # chan C_PW dieu khien nguon cap cho RPI Sim808 Shield
-PWKpin = 17  # chan PWK : bat/tat RPI Sim808 Shield
+# C_PWpin = 27  # chan C_PW dieu khien nguon cap cho RPI Sim808 Shield
+# PWKpin = 17  # chan PWK : bat/tat RPI Sim808 Shield
 swPin = 12  # chan swPin dong relay
 swPinOff = 16 # chan swPinOff ngat relay
 statusPin = 18 # chan tiep diem doc trang thai
@@ -35,8 +35,8 @@ phone = ''
 
 # Setup GPIO mode
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(C_PWpin, GPIO.OUT)
-GPIO.setup(PWKpin, GPIO.OUT)
+# GPIO.setup(C_PWpin, GPIO.OUT)
+# GPIO.setup(PWKpin, GPIO.OUT)
 GPIO.setup(swPin, GPIO.OUT)
 GPIO.setup(swPinOff, GPIO.OUT)
 GPIO.setup(statusPin, GPIO.IN)
@@ -89,56 +89,50 @@ def switch_pop(boolean = 1):
     print('Pop status switched\n')
 
 # Ham bat/tat modem
-def GSM_Power():
-    GPIO.output(PWKpin, 1)
-    time.sleep(2)
-    GPIO.output(PWKpin, 0)
-    time.sleep(2)
-    print("Switched\n")
-    return
+# def GSM_Power():
+#     GPIO.output(PWKpin, 1)
+#     time.sleep(2)
+#     GPIO.output(PWKpin, 0)
+#     time.sleep(2)
+#     print("Switched\n")
+#     return
 
 # Ham khoi tao cho modem
-def GSM_Init():
-    print("Khoi tao cho module SIM808... \n")
-    ser.write(b'ATE0\r\n')  # Tat che do phan hoi (Echo mode)
-    time.sleep(1)
-    ser.write(b'AT+IPR=9600\r\n')  # Dat toc do truyen nhan du lieu 9600bps
-    time.sleep(1)
-    ser.write(b'AT+CMGF=1\r\n')  # Chon che do text mode
-    time.sleep(1)
-    ser.write(b'AT+CNMI=2,2\r\n')  # Hien thi truc tiep noi dung tin nhan
-    time.sleep(1)
-    ser.write(b'AT+CGNSPWR=1\r\n')  # Bat GPS
-    time.sleep(1)
-    return
+# def GSM_Init():
+#     print("Khoi tao cho module SIM808... \n")
+#     ser.write(b'ATE0\r\n')  # Tat che do phan hoi (Echo mode)
+#     time.sleep(1)
+#     ser.write(b'AT+IPR=9600\r\n')  # Dat toc do truyen nhan du lieu 9600bps
+#     time.sleep(1)
+#     ser.write(b'AT+CMGF=1\r\n')  # Chon che do text mode
+#     time.sleep(1)
+#     ser.write(b'AT+CNMI=2,2\r\n')  # Hien thi truc tiep noi dung tin nhan
+#     time.sleep(1)
+#     ser.write(b'AT+CGNSPWR=1\r\n')  # Bat GPS
+#     time.sleep(1)
+#     return
 
 # KIem tra xem modem dang bat hay tat cho den khi da bat.
-def GSM_Check():
-    print("Check phan hoi tu GSM")
-    ser.write(b"AT\r\n")
-    time.sleep(1)
-    res = ser.read(100)
-    print(str(res, encoding="latin1"))
-    if re.search("ERROR", str(res, encoding="latin1")) or res == b'':  #
-        print("GSM da bi tat, dang bat lai...")
-        GSM_Power()
-        GSM_Check()
-    else:
-        print("GSM hien tai dang bat")
-        GSM_Init()
-        res = ser.readall()
-        print(str(res, encoding="latin1"))
+# def GSM_Check():
+#     print("Check phan hoi tu GSM")
+#     ser.write(b"AT\r\n")
+#     time.sleep(1)
+#     res = ser.read(100)
+#     print(str(res, encoding="latin1"))
+#     if re.search("ERROR", str(res, encoding="latin1")) or res == b'':  #
+#         print("GSM da bi tat, dang bat lai...")
+#         GSM_Power()
+#         GSM_Check()
+#     else:
+#         print("GSM hien tai dang bat")
+#         GSM_Init()
+#         res = ser.readall()
+#         print(str(res, encoding="latin1"))
 
 
 # Gui tin nhan
 def GSM_MakeSMS(phone, text):
-    print("Nhan tin...\n")
-    cmd = "AT+CMGS=\"{}\"\r\n".format(phone)
-    ser.write(bytes(cmd, encoding='latin1'))
-    time.sleep(0.5)
-    ser.write(bytes(text, encoding='latin1'))
-    ser.write(b'\x1A')  # Gui Ctrl Z hay 26, 0x1A de ket thuc noi dung tin nhan va gui di
-    return
+    os.system('echo "{1}" | gammu --sendsms TEXT {0}'.format(phone, text))
 
 
 # Xu li cac phan hoi tu server
