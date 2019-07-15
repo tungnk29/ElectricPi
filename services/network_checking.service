@@ -1,0 +1,11 @@
+[Unit]
+Description=Network Switching Services
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /opt/ElectricPi/ElectricPop/network_checking.sh
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
