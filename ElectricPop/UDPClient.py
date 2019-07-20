@@ -132,7 +132,7 @@ def switch_pop(boolean = 1):
 
 # Gui tin nhan
 def GSM_MakeSMS(phone, text):
-    os.system('echo "{1}" | gammu --sendsms TEXT {0}'.format(phone, text))
+    os.system("echo '{}' | gammu --sendsms TEXT {}".format(text, phone))
 
 
 # Xu li cac phan hoi tu server
