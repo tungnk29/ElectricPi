@@ -145,7 +145,7 @@ def recv_package(decrespone):
         phone = decrespone["phone"]
         print(counter)
         if decrespone.get("alarm") == True:
-            if counter % 4 == 0:
+            if counter % 4 == 0 and counter <= 12:
                 GSM_MakeSMS(phone, "Canh bao! Co su co !!!")
                 print("Canh bao nguy hiem")
             counter += 1
