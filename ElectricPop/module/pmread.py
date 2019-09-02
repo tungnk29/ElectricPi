@@ -15,9 +15,7 @@ def get_modbus_path():
 
     result = str(result, encoding='utf-8')
 
-    device_path = re.search(r'ttyUSB\d+', result).group()
-
-    return '/dev/' + device_path
+    return '/dev/' + result
 
 
 def is_connected():
