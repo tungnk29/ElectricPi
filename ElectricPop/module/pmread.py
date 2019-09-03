@@ -15,7 +15,7 @@ def get_modbus_path():
 
     result = str(result, encoding='utf-8')
 
-    return '/dev/' + result
+    return '/dev/' + result.strip()
 
 
 def is_connected():
