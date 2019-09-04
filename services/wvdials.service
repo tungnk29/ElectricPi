@@ -1,0 +1,11 @@
+[Unit]
+Description=Modem 3G Services
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /opt/ElectricPi/ElectricPop/module/autowvdials.sh
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
