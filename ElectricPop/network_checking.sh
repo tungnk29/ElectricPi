@@ -7,8 +7,7 @@ while true ; do
                 echo "Eth0 is working"
 
                 current_dni=$(ip route show | awk '/default.*ppp0/ {print $3}')
-                if [ $current_dni == "ppp0" ]
-                then
+                if [[ $current_dni == "ppp0" ]] ; then
                     echo "Switching to Ethernet"
                     sudo ip route del default dev ppp0
                 fi
