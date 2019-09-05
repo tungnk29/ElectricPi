@@ -24,7 +24,8 @@ while true ; do
                         echo "Switching to USB 3G..."              
                         sudo ip route add default dev ppp
                     else
-                        echo "Fail to Switching to USB 3G :("
+                        echo "Fail to Switching to USB 3G :( Restarting service !"
+                        systemctl restart systemctl restart wvdials
                     fi
                 fi
 
