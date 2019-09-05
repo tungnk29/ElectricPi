@@ -10,9 +10,10 @@ while true ; do
                 if [[ $current_dni == "ppp0" ]] ; then
                     echo "Switching to Ethernet"
                     ip route del default dev ppp0
+                    cho "Ethernet card is running !"
                 fi
         else
-                echo "Eth0 is busted.\n"
+                echo "Eth0 is busted."
 
                 current_dni=$(ip route show | awk '/default.*ppp0/ {print $3}')
                 if [[ $current_dni != "ppp0" ]] ; then
@@ -23,9 +24,11 @@ while true ; do
                     then
                         echo "Switching to USB 3G..."              
                         ip route add default dev ppp0
+                        echo "USB modem is running !"
+
                     else
-                        echo "Fail to Switching to USB 3G :( Restarting service !"
-                        systemctl restart systemctl restart wvdials
+                        echo "Fail to Switching to USB 3G :(  Try to restarting service !"
+                        systemctl restart wvdials
                     fi
                 fi
 
