@@ -26,7 +26,7 @@ phone = ''
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(swPin, GPIO.OUT)
 GPIO.setup(swPinOff, GPIO.OUT)
-GPIO.setup(statusPin, GPIO.IN)
+GPIO.setup(statusPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 GPIO.output(swPin, 0)
 GPIO.output(swPinOff, 0)
