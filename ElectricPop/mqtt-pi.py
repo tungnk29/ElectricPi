@@ -198,7 +198,7 @@ client.username_pw_set(username='scada', password='Abcd@1234@')
 client.tls_set('/etc/ssl/certs/DST_Root_CA_X3.pem', tls_version=ssl.PROTOCOL_TLSv1_2)        
 
 # LWT
-status_lwt = json.dumps({'modem_status': 0, 'pop_status': 0}, 'token': config['token']).encode()
+status_lwt = json.dumps({'modem_status': 0, 'pop_status': 0, 'token': config['token']}).encode()
 status_lwt = cipher.encrypt(status_lwt).decode()
 client.will_set(topic=topic_status, payload="Offline", qos=2, retain=True)
 
@@ -213,7 +213,7 @@ client.subscribe(topic=topic_execute, qos=2)
 def main():
     while True:
         try:
-            status_pack = json.dumps({'modem_status': 1, 'pop_status': read_status_pin()}, 'token': config['token']).encode()
+            status_pack = json.dumps({'modem_status': 1, 'pop_status': read_status_pin(), 'token': config['token']}).encode()
             status_pack = cipher.encrypt(status_pack).decode()
 
             packs = uicosfi_package(config['token'])
