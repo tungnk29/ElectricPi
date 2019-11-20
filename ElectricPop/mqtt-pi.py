@@ -128,6 +128,7 @@ def uicosfi_package(token):
     pack2send["token"] = token
     pack2send["temperature"] = sensor_reading()
     pack2send["real_status"] = read_status_pin()
+    pack2send["datetime"] = datetime.now()
 
     packg = cipher.encrypt(json.dumps(pack2send).encode())
     return packg.decode()
