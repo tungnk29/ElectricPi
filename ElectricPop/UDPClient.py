@@ -82,6 +82,11 @@ def switch_pop(boolean = 1):
 def GSM_MakeSMS(phone, text):
     os.system("bash /opt/ElectricPi/ElectricPop/module/smsgammu.sh '{0}' {1}".format(text, phone))
 
+def parse_sms(content):
+    text = 'Dia chi: {} \n'.format(content['address'])
+    for k, v in content['detail'].items():
+        text += '{}: {} \n'.format(k, v)
+    return text
 
 # Xu li cac phan hoi tu server
 def recv_package(decrespone):
@@ -94,7 +99,7 @@ def recv_package(decrespone):
         print(counter)
         if decrespone.get("alarm") == True:
             if counter % 4 == 0 and counter <= 12:
-                GSM_MakeSMS(phone, "Canh bao! Co su co !!!")
+                GSM_MakeSMS(phone, parse_sms(decrespone['warning']))
                 print("Canh bao nguy hiem")
             counter += 1
 
