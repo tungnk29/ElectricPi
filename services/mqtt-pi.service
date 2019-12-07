@@ -1,0 +1,11 @@
+[Unit]
+Description=Pi MQTT Client Services
+After=multi-user.target
+ 
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/python3 '/opt/ElectricPi/ElectricPop/mqtt-pi.py'
+Restart=on-abort
+ 
+[Install]
+WantedBy=multi-user.target
