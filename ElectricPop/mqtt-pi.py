@@ -219,7 +219,7 @@ def main():
 
             packs = uicosfi_package(config['token'])
             client.publish(topic=topic_push, payload=packs)
-            client.publish(topic=topic_status, payload="Online")
+            client.publish(topic=topic_status, payload=status_pack)
             time.sleep(2)
         except KeyboardInterrupt:
             print("Break program !")
