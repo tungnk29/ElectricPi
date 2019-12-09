@@ -93,7 +93,8 @@ def recv_package(decrespone):
         print(counter)
         if decrespone.get("alarm") == True:
             if counter % 4 == 0 and counter <= 12:
-                GSM_MakeSMS(phone, "Canh bao! Co su co !!!")
+                Thread(target=GSM_MakeSMS, args=(phone, "Canh bao! Co su co !!!")).start()
+                # GSM_MakeSMS(phone, "Canh bao! Co su co !!!")
                 print("Canh bao nguy hiem")
             counter += 1
 
@@ -154,18 +155,24 @@ rc_message = [
         'Connection refused – not authorised'
     ]
 
+def status_package():
+    status_pack = json.dumps({'modem_status': 1, 'pop_status': read_status_pin(), 'token': config['token']}).encode()
+    status_pack = cipher.encrypt(status_pack).decode()
+
+    return status_pack
+
 def on_publish(client, obj, mid):
     print("mid: " + str(mid))
 
 def on_connect(client, userdata, flags, rc):
     if rc==0:
-        status_pack = json.dumps({'modem_status': 1, 'pop_status': read_status_pin(), 'token': config['token']}).encode()
-        status_pack = cipher.encrypt(status_pack).decode()
+        # status_pack = json.dumps({'modem_status': 1, 'pop_status': read_status_pin(), 'token': config['token']}).encode()
+        # status_pack = cipher.encrypt(status_pack).decode()
 
         client.connected_flag = True #set flag
         print("connected OK Returned code=",rc)
 
-        client.publish(topic=topic_status, payload=status_obj)
+        client.publish(topic=topic_status, payload=status_package())
 
         print("subscribing Topic %s ..." % topic_execute)
         client.subscribe(topic=topic_execute, qos=1)
@@ -214,12 +221,12 @@ client.subscribe(topic=topic_execute, qos=2)
 def main():
     while True:
         try:
-            status_pack = json.dumps({'modem_status': 1, 'pop_status': read_status_pin(), 'token': config['token']}).encode()
-            status_pack = cipher.encrypt(status_pack).decode()
+            # status_pack = json.dumps({'modem_status': 1, 'pop_status': read_status_pin(), 'token': config['token']}).encode()
+            # status_pack = cipher.encrypt(status_pack).decode()
 
             packs = uicosfi_package(config['token'])
             client.publish(topic=topic_push, payload=packs)
-            client.publish(topic=topic_status, payload=status_pack)
+            client.publish(topic=topic_status, payload=status_package())
             time.sleep(2)
         except KeyboardInterrupt:
             print("Break program !")
