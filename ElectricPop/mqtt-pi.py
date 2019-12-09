@@ -80,7 +80,7 @@ def read_status_pin():
 
 # Gui tin nhan
 def GSM_MakeSMS(phone, text):
-    os.system("bash /opt/ElectricPi/ElectricPop/module/smsgammu.sh '{0}' '{1}'".format(text, phone))
+    os.system("bash /opt/ElectricPi/ElectricPop/module/smsgammu.sh '{0}' '{1}' &".format(text, phone))
 
 # Xu li cac phan hoi tu server
 def recv_package(decrespone):
