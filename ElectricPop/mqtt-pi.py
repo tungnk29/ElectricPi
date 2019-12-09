@@ -167,7 +167,7 @@ def on_connect(client, userdata, flags, rc):
 
         client.publish(topic=topic_status, payload=status_obj)
 
-        print("subscribing Topic...")
+        print("subscribing Topic %s ..." % topic_execute)
         client.subscribe(topic=topic_execute, qos=1)
 
         return
@@ -184,7 +184,7 @@ def on_disconnect(client, userdata, rc):
     client.disconnect_flag = True
 
 def on_message(mosq, obj, msg):
-    print(msg.topic)
+    print("Message arrive  from %s " % msg.topic)
     if (msg.topic == topic_execute):
         data = json.loads(cipher.decrypt(msg.payload))
 
@@ -226,11 +226,12 @@ def main():
             GPIO.cleanup()
             break
 
-# client.loop_forever()
+Thread(target=main, args=()).start()
 
-client.loop_start()
+client.loop_forever()
 
-# Thread(target=main, args=()).start()
-main()
+# client.loop_start()
 
-client.loop_stop()
+# main()
+
+# client.loop_stop()
