@@ -170,10 +170,10 @@ def status_package():
 def on_connect(client, flags, rc, properties):
     print("connected OK Returned code=",rc)
 
-    client.publish(topic=topic_status, payload=status_package())
+    client.publish(topic_status, status_package())
 
     print(f'subscribing topic {topic_execute} ...')
-    client.subscribe(topic=topic_execute, qos=1)
+    client.subscribe(topic_execute, qos=1)
 
 def on_disconnect(client, packet, exc=None):
     print('Disconnected')
@@ -196,8 +196,8 @@ async def main_push(client):
         # status_pack = cipher.encrypt(status_pack).decode()
 
         packs = await uicosfi_package(config['token'])
-        client.publish(topic=topic_push, payload=packs)
-        client.publish(topic=topic_status, payload=status_package())
+        client.publish(topic_push, payload=packs)
+        client.publish(topic_status, payload=status_package())
         await asyncio.sleep(2)
         GPIO.cleanup()
         
