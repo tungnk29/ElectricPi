@@ -194,7 +194,7 @@ async def main_push(client):
         # status_pack = json.dumps({'modem_status': 1, 'pop_status': read_status_pin(), 'token': config['token']}).encode()
         # status_pack = cipher.encrypt(status_pack).decode()
 
-        await packs = uicosfi_package(config['token'])
+        packs = await uicosfi_package(config['token'])
         client.publish(topic=topic_push, payload=packs)
         client.publish(topic=topic_status, payload=status_package())
         await asyncio.sleep(2)
