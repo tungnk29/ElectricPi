@@ -4,6 +4,7 @@ from datetime import datetime
 from gmqtt import Client as MQTTClient
 import RPi.GPIO as GPIO
 import sqlite3 as sql
+import gmqtt
 import asyncio
 import signal
 import uvloop
