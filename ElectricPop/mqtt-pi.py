@@ -183,7 +183,7 @@ def on_subscribe(client, mid, qos):
 
 def on_message(client, topic, payload, qos, properties):
     print(f"Message arrive from {topic} ")
-    if (msg.topic == topic_execute):
+    if (topic == topic_execute):
         data = json.loads(cipher.decrypt(payload))
 
         print("Message to execute: " + str(data))
