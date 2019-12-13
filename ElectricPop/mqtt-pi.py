@@ -182,7 +182,7 @@ def on_subscribe(client, mid, qos):
     print('SUBSCRIBED')
 
 def on_message(client, topic, payload, qos, properties):
-    print(f"Message arrive  from {topic} ")
+    print(f"Message arrive from {topic} ")
     if (msg.topic == topic_execute):
         data = json.loads(cipher.decrypt(payload))
 
@@ -195,10 +195,11 @@ async def main_push(client):
         # status_pack = json.dumps({'modem_status': 1, 'pop_status': read_status_pin(), 'token': config['token']}).encode()
         # status_pack = cipher.encrypt(status_pack).decode()
 
-        packs = await uicosfi_package(config['token'])
+        packs = uicosfi_package(config['token'])
+        await asyncio.sleep(2)
         client.publish(topic_push, payload=packs)
         client.publish(topic_status, payload=status_package())
-        await asyncio.sleep(2)
+        
         GPIO.cleanup()
         
 async def main():
