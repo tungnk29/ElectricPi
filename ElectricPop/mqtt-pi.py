@@ -215,7 +215,7 @@ async def main():
     client.on_subscribe = on_subscribe
 
     client.set_auth_credentials('scada', 'Abcd@1234@')
-    await client.connect(broker_host, 8883, ssl=True)
+    await client.connect(broken_url, broken_port, ssl=True)
 
     # client.subscribe(topic=topic_execute, qos=2)
 
