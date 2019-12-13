@@ -200,7 +200,7 @@ async def main_push(client):
         await asyncio.sleep(2)
         GPIO.cleanup()
         
-async def main()
+async def main():
     # LWT
     status_lwt = json.dumps({'modem_status': 0, 'pop_status': 0, 'token': config['token']}).encode()
     status_lwt = cipher.encrypt(status_lwt).decode()
