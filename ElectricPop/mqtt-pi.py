@@ -1,16 +1,19 @@
 from module.pmread import register_reading, sensor_reading
 from cryptography.fernet import Fernet
 from datetime import datetime
-from threading import Thread
-import paho.mqtt.client as mqtt
+from gmqtt import Client as MQTTClient
 import RPi.GPIO as GPIO
 import sqlite3 as sql
-import psutil
-import time
+import asyncio
+import signal
+import uvloop
 import json
-import ssl
-import re
 import os
+
+
+STOP = asyncio.Event()
+
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # path to database config file
 cwd = os.path.dirname(os.path.realpath(__file__))
@@ -93,8 +96,7 @@ def recv_package(decrespone):
         print(counter)
         if decrespone.get("alarm") == True:
             if counter % 4 == 0 and counter <= 12:
-                Thread(target=GSM_MakeSMS, args=(phone, "Canh bao! Co su co !!!")).start()
-                # GSM_MakeSMS(phone, "Canh bao! Co su co !!!")
+                GSM_MakeSMS(phone, parse_sms(decrespone['warning']))
                 print("Canh bao nguy hiem")
             counter += 1
 
@@ -155,90 +157,78 @@ rc_message = [
         'Connection refused – not authorised'
     ]
 
+def ask_exit(*args):
+    STOP.set()
+
 def status_package():
     status_pack = json.dumps({'modem_status': 1, 'pop_status': read_status_pin(), 'token': config['token']}).encode()
     status_pack = cipher.encrypt(status_pack).decode()
 
     return status_pack
 
-def on_publish(client, obj, mid):
-    print("mid: " + str(mid))
+def on_connect(client, flags, rc, properties):
+    print("connected OK Returned code=",rc)
 
-def on_connect(client, userdata, flags, rc):
-    if rc==0:
-        # status_pack = json.dumps({'modem_status': 1, 'pop_status': read_status_pin(), 'token': config['token']}).encode()
-        # status_pack = cipher.encrypt(status_pack).decode()
+    client.publish(topic=topic_status, payload=status_package())
 
-        client.connected_flag = True #set flag
-        print("connected OK Returned code=",rc)
+    print(f'subscribing topic {topic_execute} ...')
+    client.subscribe(topic=topic_execute, qos=1)
 
-        client.publish(topic=topic_status, payload=status_package())
+def on_disconnect(client, packet, exc=None):
+    print('Disconnected')
 
-        print("subscribing Topic %s ..." % topic_execute)
-        client.subscribe(topic=topic_execute, qos=1)
+def on_subscribe(client, mid, qos):
+    print('SUBSCRIBED')
 
-        return
-        
-    print("Bad connection Returned code= ",rc)
-    client.bad_connection_flag = True
-    
-
-def on_disconnect(client, userdata, rc):
-    print("Client got disconnected!")
-    print(rc, ': ', rc_message[rc])
-
-    client.connected_flag = False
-    client.disconnect_flag = True
-
-def on_message(mosq, obj, msg):
-    print("Message arrive  from %s " % msg.topic)
+def on_message(client, topic, payload, qos, properties):
+    print(f"Message arrive  from {topic} ")
     if (msg.topic == topic_execute):
-        data = json.loads(cipher.decrypt(msg.payload))
+        data = json.loads(cipher.decrypt(payload))
 
         print("Message to execute: " + str(data))
         
         recv_package(data)
-        
 
-
-client = mqtt.Client()
-client.username_pw_set(username='scada', password='Abcd@1234@')
-client.tls_set('/etc/ssl/certs/DST_Root_CA_X3.pem', tls_version=ssl.PROTOCOL_TLSv1_2)        
-
-# LWT
-status_lwt = json.dumps({'modem_status': 0, 'pop_status': 0, 'token': config['token']}).encode()
-status_lwt = cipher.encrypt(status_lwt).decode()
-client.will_set(topic=topic_status, payload="Offline", qos=2, retain=True)
-
-client.on_connect = on_connect
-client.on_disconnect = on_disconnect
-client.on_message = on_message
-client.on_publish = on_publish
-client.connect(host=broken_url, port=broken_port, keepalive=10)
-
-client.subscribe(topic=topic_execute, qos=2)
-
-def main():
+async def main_push(client):
     while True:
-        try:
-            # status_pack = json.dumps({'modem_status': 1, 'pop_status': read_status_pin(), 'token': config['token']}).encode()
-            # status_pack = cipher.encrypt(status_pack).decode()
+        # status_pack = json.dumps({'modem_status': 1, 'pop_status': read_status_pin(), 'token': config['token']}).encode()
+        # status_pack = cipher.encrypt(status_pack).decode()
 
-            packs = uicosfi_package(config['token'])
-            client.publish(topic=topic_push, payload=packs)
-            client.publish(topic=topic_status, payload=status_package())
-            time.sleep(2)
-        except KeyboardInterrupt:
-            print("Break program !")
-            GPIO.cleanup()
-            break
+        await packs = uicosfi_package(config['token'])
+        client.publish(topic=topic_push, payload=packs)
+        client.publish(topic=topic_status, payload=status_package())
+        await asyncio.sleep(2)
+        GPIO.cleanup()
+        
+async def main()
+    # LWT
+    status_lwt = json.dumps({'modem_status': 0, 'pop_status': 0, 'token': config['token']}).encode()
+    status_lwt = cipher.encrypt(status_lwt).decode()
 
-Thread(target=main, args=()).start()
+    will_message = gmqtt.Message(topic_status, status_lwt, will_delay_interval=5) 
+    client = MQTTClient(config['token'], will_message=will_message)
 
-client.loop_forever()
+    client.on_connect = on_connect
+    client.on_disconnect = on_disconnect
+    client.on_message = on_message
+    client.on_subscribe = on_subscribe
 
-# client.loop_start()
+    client.set_auth_credentials('scada', 'Abcd@1234@')
+    await client.connect(broker_host, 8883, ssl=True)
 
-# main()
+    # client.subscribe(topic=topic_execute, qos=2)
 
-# client.loop_stop()
+    loop.create_task(main_push(client))
+
+    await STOP.wait()
+    await client.disconnect()
+
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+
+    loop.add_signal_handler(signal.SIGINT, ask_exit)
+    loop.add_signal_handler(signal.SIGTERM, ask_exit)
+
+    loop.run_until_complete(main())
+
+
