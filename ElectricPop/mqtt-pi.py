@@ -1,10 +1,9 @@
 from module.pmread import register_reading, sensor_reading
 from cryptography.fernet import Fernet
 from datetime import datetime
-from gmqtt import Client as MQTTClient
+from gmqtt import Message, Client as MQTTClient
 import RPi.GPIO as GPIO
 import sqlite3 as sql
-import gmqtt
 import asyncio
 import signal
 import uvloop
@@ -193,7 +192,7 @@ def on_message(client, topic, payload, qos, properties):
 
 async def main_push(client):
     while True:
-        packs = uicosfi_package(config['token'])
+        packs = await uicosfi_package(config['token'])
         await asyncio.sleep(2)
         client.publish(topic_push, payload=packs)
         client.publish(topic_status, payload=status_package())
@@ -204,7 +203,7 @@ async def main():
     status_lwt = json.dumps({'modem_status': 0, 'pop_status': 0, 'token': config['token']}).encode()
     status_lwt = cipher.encrypt(status_lwt).decode()
 
-    will_message = gmqtt.Message(topic_status, status_lwt, will_delay_interval=5) 
+    will_message = Message(topic_status, status_lwt, will_delay_interval=5) 
     client = MQTTClient(config['token'], will_message=will_message)
 
     client.on_connect = on_connect
