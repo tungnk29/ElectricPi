@@ -12,8 +12,9 @@ import time
 import os
 
 
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 STOP = asyncio.Event()
+
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # path to database config file
 cwd = os.path.dirname(os.path.realpath(__file__))
@@ -192,10 +193,10 @@ def on_message(client, topic, payload, qos, properties):
 
 async def main_push(client):
     while True:
-        packs = uicosfi_package(config['token'])
-        await asyncio.sleep(1)
+        packs = await uicosfi_package(config['token'])
+        await asyncio.sleep(2)
         client.publish(topic_push, payload=packs)
-        client.publish(topic_status, payload=status_package())       
+        client.publish(topic_status, payload=status_package())
         
         
 async def main():
@@ -216,7 +217,6 @@ async def main():
 
     # client.subscribe(topic=topic_execute, qos=2)
 
-    # await main_push(client)
     loop.create_task(main_push(client))
 
     await STOP.wait()
