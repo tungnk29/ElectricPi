@@ -193,15 +193,11 @@ def on_message(client, topic, payload, qos, properties):
 
 async def main_push(client):
     while True:
-        # status_pack = json.dumps({'modem_status': 1, 'pop_status': read_status_pin(), 'token': config['token']}).encode()
-        # status_pack = cipher.encrypt(status_pack).decode()
-
         packs = uicosfi_package(config['token'])
         await asyncio.sleep(2)
         client.publish(topic_push, payload=packs)
         client.publish(topic_status, payload=status_package())
         
-        GPIO.cleanup()
         
 async def main():
     # LWT
@@ -233,5 +229,7 @@ if __name__ == '__main__':
     loop.add_signal_handler(signal.SIGTERM, ask_exit)
 
     loop.run_until_complete(main())
+
+    GPIO.cleanup()
 
 
