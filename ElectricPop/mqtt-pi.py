@@ -12,9 +12,8 @@ import time
 import os
 
 
-STOP = asyncio.Event()
-
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+STOP = asyncio.Event()
 
 # path to database config file
 cwd = os.path.dirname(os.path.realpath(__file__))
