@@ -63,7 +63,7 @@ def getrec(table, mode=False):
     return res
 
 # switch on pop
-async def switch_pop(boolean = 1):
+def switch_pop(boolean = 1):
     if boolean:
         GPIO.output(swPinOn, 1)
         time.sleep(2)
