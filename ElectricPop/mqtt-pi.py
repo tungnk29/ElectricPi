@@ -66,16 +66,17 @@ def getrec(table, mode=False):
 async def switch_pop(boolean = 1):
     if boolean:
         GPIO.output(swPinOn, 1)
-        await asyncio.sleep(2)
+        time.sleep(2)
         GPIO.output(swPinOn, 0)
-        await asyncio.sleep(2)
+        time.sleep(2)
     else:
         GPIO.output(swPinOff, 1)
-        await asyncio.sleep(2)
+        time.sleep(2)
         GPIO.output(swPinOff, 0)
-        await asyncio.sleep(2)
+        time.sleep(2)
 
     print('Pop status switched\n')
+    return 1
 
 # read status contact pin 
 def read_status_pin():
@@ -229,6 +230,6 @@ if __name__ == '__main__':
 
     loop.run_until_complete(main())
 
-    # GPIO.cleanup()
+    GPIO.cleanup()
 
 
