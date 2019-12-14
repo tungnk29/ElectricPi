@@ -1,16 +1,14 @@
 from module.pmread import register_reading, sensor_reading
 from cryptography.fernet import Fernet
 from datetime import datetime
-from gmqtt import Message, Client as MQTTClient
 import RPi.GPIO as GPIO
 import sqlite3 as sql
+import json, time, os
+
 import asyncio
 import signal
 import uvloop
-import json
-import time
-import os
-
+from gmqtt import Message, Client as MQTTClient
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 STOP = asyncio.Event()
@@ -159,6 +157,7 @@ rc_message = [
     ]
 
 def ask_exit(*args):
+    GPIO.cleanup()
     STOP.set()
 
 def status_package():
@@ -193,9 +192,9 @@ def on_message(client, topic, payload, qos, properties):
 async def main_push(client):
     while True:
         packs = uicosfi_package(config['token'])
-        await asyncio.sleep(2)
-        client.publish(topic_push, payload=packs)
-        client.publish(topic_status, payload=status_package())
+        await asyncio.sleep(1)
+        client.publish(topic_push, payload=packs, qos=1, message_expiry_interval=20)
+        client.publish(topic_status, payload=status_package(), qos=1, message_expiry_interval=20)
         
         
 async def main():
@@ -203,8 +202,8 @@ async def main():
     status_lwt = json.dumps({'modem_status': 0, 'pop_status': 0, 'token': config['token']}).encode()
     status_lwt = cipher.encrypt(status_lwt).decode()
 
-    will_message = Message(topic_status, status_lwt, will_delay_interval=5) 
-    client = MQTTClient(config['token'], will_message=will_message)
+    will_message = Message(topic_status, status_lwt, qos=2, retain=1) 
+    client = MQTTClient('', will_message=will_message)
 
     client.on_connect = on_connect
     client.on_disconnect = on_disconnect
@@ -228,7 +227,4 @@ if __name__ == '__main__':
     loop.add_signal_handler(signal.SIGTERM, ask_exit)
 
     loop.run_until_complete(main())
-
-    GPIO.cleanup()
-
 
