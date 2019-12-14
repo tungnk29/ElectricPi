@@ -192,7 +192,7 @@ def on_message(client, topic, payload, qos, properties):
 
 async def main_push(client):
     while True:
-        packs = await uicosfi_package(config['token'])
+        packs = uicosfi_package(config['token'])
         await asyncio.sleep(2)
         client.publish(topic_push, payload=packs)
         client.publish(topic_status, payload=status_package())
