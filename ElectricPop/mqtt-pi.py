@@ -3,7 +3,7 @@ from cryptography.fernet import Fernet
 from datetime import datetime
 import RPi.GPIO as GPIO
 import sqlite3 as sql
-import json, time, os
+import json, time, os, logging
 
 import asyncio
 import signal
@@ -189,6 +189,22 @@ def on_message(client, topic, payload, qos, properties):
         
         recv_package(data)
 
+def on_connect_lwt(client, flags, rc, properties):
+    logging.info('[CONNECTED {}]'.format(client._client_id))
+
+
+def on_message_lwt(client, topic, payload, qos, properties):
+    logging.info('[RECV MSG {}] TOPIC: {} PAYLOAD: {} QOS: {} PROPERTIES: {}'
+                 .format(client._client_id, topic, payload, qos, properties))
+
+
+def on_disconnect_lwt(client, packet, exc=None):
+    logging.info('[DISCONNECTED {}]'.format(client._client_id))
+
+
+def on_subscribe_lwt(client, mid, qos):
+    logging.info('[SUBSCRIBED {}] QOS: {}'.format(client._client_id, qos))
+
 async def main_push(client):
     while True:
         packs = uicosfi_package(config['token'])
@@ -202,8 +218,19 @@ async def main():
     status_lwt = json.dumps({'modem_status': 0, 'pop_status': 0, 'token': config['token']}).encode()
     status_lwt = cipher.encrypt(status_lwt).decode()
 
-    will_message = Message(topic_status, status_lwt, qos=2, retain=1) 
-    client = MQTTClient('', will_message=will_message)
+    will_message = Message(topic_status, status_lwt, qos=2, retain=1, will_delay_interval=10)
+    will_client = gmqtt.Client("", will_message=will_message)
+
+    will_client.on_connect = on_connect_lwt
+    will_client.on_disconnect = on_disconnect_lwt
+    will_client.on_message = on_message_lwt
+    will_client.on_subscribe = on_subscribe_lwt
+
+    will_client.set_auth_credentials('scada', 'Abcd@1234@')
+    await will_client.connect(broken_url, broken_port, ssl=True)
+
+    # Main client
+    client = MQTTClient('')
 
     client.on_connect = on_connect
     client.on_disconnect = on_disconnect
@@ -217,11 +244,14 @@ async def main():
 
     loop.create_task(main_push(client))
 
+    await will_client.disconnect(reason_code=4, reason_string="Smth went wrong")
+
     await STOP.wait()
     await client.disconnect()
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
+    logging.basicConfig(level=logging.INFO)
 
     loop.add_signal_handler(signal.SIGINT, ask_exit)
     loop.add_signal_handler(signal.SIGTERM, ask_exit)
