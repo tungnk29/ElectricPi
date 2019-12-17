@@ -219,7 +219,7 @@ async def main():
     status_lwt = cipher.encrypt(status_lwt).decode()
 
     will_message = Message(topic_status, status_lwt, qos=2, retain=1, will_delay_interval=10)
-    will_client = gmqtt.Client("", will_message=will_message)
+    will_client = MQTTClient("", will_message=will_message)
 
     will_client.on_connect = on_connect_lwt
     will_client.on_disconnect = on_disconnect_lwt
