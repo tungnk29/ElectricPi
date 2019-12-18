@@ -84,6 +84,12 @@ def read_status_pin():
 def GSM_MakeSMS(phone, text):
     os.system("bash /opt/ElectricPi/ElectricPop/module/smsgammu.sh '{0}' '{1}' &".format(text, phone))
 
+def parse_sms(content):
+    text = 'Dia chi: {} \n'.format(content['address'])
+    for k, v in content['detail'].items():
+        text += '{}: {} \n'.format(k, v)
+    return text
+
 # Xu li cac phan hoi tu server
 def recv_package(decrespone):
     # print(decrespone)
