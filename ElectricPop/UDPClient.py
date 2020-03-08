@@ -83,9 +83,21 @@ def GSM_MakeSMS(phone, text):
     os.system("bash /opt/ElectricPi/ElectricPop/module/smsgammu.sh '{0}' {1}".format(text, phone))
 
 def parse_sms(content):
-    text = 'Dia chi: {} \n'.format(content['address'])
+    # full package from server
+    # {
+    #         'address': 'Công Ty TNHH KHC', 
+    #         'detail': {
+    #             '1': {'vln': [1.000000045813705e-18, False]} 
+    #         }
+    # }
+
+    text = f'Dia chi: {content['address']} \n'
     for k, v in content['detail'].items():
-        text += '{}: {} \n'.format(k, v)
+        text += f'Powermeter {k}: '
+        if v.get('vln', False):
+            text += f'VLN: {v['vln'][0]} ({">= Vmax" if v['vln'][1] else "< Vmin"}).'
+        if v.get('a', False):
+            text += f'I: {v['a'][0]} ({">= Imax" if v['a'][1] else "< Imin"}).'
     return text
 
 # Xu li cac phan hoi tu server
@@ -104,7 +116,7 @@ def recv_package(decrespone):
             counter += 1
 
     def notify(phone):
-        GSM_MakeSMS(phone, "Da het su co ! ^ _ ^")
+        GSM_MakeSMS(phone, "Da het su co !")
 
     def switch():
         '''Dong ngat mach'''
