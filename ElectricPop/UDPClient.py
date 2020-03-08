@@ -91,7 +91,7 @@ def parse_sms(content):
     #         }
     # }
 
-    text = f'Dia chi: {content['address']} \n'
+    text = f'Dia chi: {content["address"]} \n'
     for k, v in content['detail'].items():
         text += f'Powermeter {k}: '
         if v.get('vln', False):
