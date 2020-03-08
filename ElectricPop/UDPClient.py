@@ -95,9 +95,9 @@ def parse_sms(content):
     for k, v in content['detail'].items():
         text += f'Powermeter {k}: '
         if v.get('vln', False):
-            text += f'VLN: {v['vln'][0]} ({">= Vmax" if v['vln'][1] else "< Vmin"}).'
+            text += f'VLN: {v["vln"][0]} ({">= Vmax" if v["vln"][1] else "< Vmin"}).'
         if v.get('a', False):
-            text += f'I: {v['a'][0]} ({">= Imax" if v['a'][1] else "< Imin"}).'
+            text += f'I: {v["a"][0]} ({">= Imax" if v["a"][1] else "< Imin"}).'
     return text
 
 # Xu li cac phan hoi tu server
