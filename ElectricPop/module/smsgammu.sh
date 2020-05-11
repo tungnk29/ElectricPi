@@ -1,6 +1,6 @@
 #!/bin/bash
 
-net_sms=$(dmesg | awk '/GSM.*ttyUSB[0-9]/ {print $NF}' | tail -1)
+net_sms=$(bash lsusb.sh | awk '/Mobile/ {print $1}' | tail -1)
 
 if [[ $net_sms != '' ]] ; then 
     echo "Found path of GSM Modem ! Starting send SMS!"
