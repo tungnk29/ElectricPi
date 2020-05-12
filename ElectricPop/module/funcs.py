@@ -200,10 +200,10 @@ def validator(instance):
 
 def register_reading(count, **kwargs):
     print("Start reading Power Meter...")
+    kwargs.pop('id')
     result = {
         'ids': kwargs.pop('ids')
     }
-    
     try:
         modbus = ModbusClient(method='rtu', port=get_modbus_path(), baudrate=9600, timeout=1, parity='E', bytesize=8)
         modbus.connect()
