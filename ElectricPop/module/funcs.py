@@ -133,7 +133,7 @@ def recv_package(decrespone):
 
         global phone, counter
 
-        if decrespone["switch"] != GPIO.input(GPIO_PIN_IN['RMU_C_Out']):
+        if decrespone["switch"] != GPIO.input(GPIO_PIN_IN['ATM_LV_CI_OP']):
             switch_pop(decrespone["switch"])
 
         if not decrespone.get("alarm", 0):
@@ -149,11 +149,18 @@ def uicosfi_package(token):
     pack2send = dict()
     pminfo = getrec("powermeter")
 
+    pins_status = dict()
+
     uicosfi = [register_reading(count=2, **d) for d in pminfo]
     pack2send["record"] = uicosfi
     pack2send["token"] = token
     pack2send["temperature"] = sensor_reading()
-    pack2send["real_status"] = read_status_pin(GPIO_PIN_IN['RMU_C_Out'])
+    # pack2send["real_status"] = read_status_pin(GPIO_PIN_IN['RMU_C_Out'])
+
+    for key, val in GPIO_PIN_IN.items():
+        pins_status[key] = read_status_pin(val)
+
+    pack2send.update(pins_status)
 
     packg = cipher.encrypt(json.dumps(pack2send).encode())
     return packg
