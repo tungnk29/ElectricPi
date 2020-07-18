@@ -1,13 +1,13 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, redirect, url_for, request, json
-from module.pmread import sensor_reading, is_connected
+from module.funcs import sensor_reading, is_connected
 import sqlite3 as sql
 import os, re
 app = Flask(__name__)
 
 cwd = os.path.dirname(os.path.realpath(__file__))
-dbpath = cwd + "/config.db"
+dbpath = cwd + "/module/config.db"
 
 def getrec(table, mode = False):
     db = sql.connect(dbpath)
