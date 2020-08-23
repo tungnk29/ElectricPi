@@ -54,6 +54,8 @@ class PiMethods():
 
     TOKEN = reds.get('TOKEN').decode()
     KEY = reds.get('KEYCRYPT')
+    HOST = reds.get('HOST').decode() or 'vtechnic.xyz'
+    PORT = reds.get('PORT').decode() or '3001'
     CIPHER = Fernet(KEY)
 
 
@@ -76,7 +78,7 @@ class PiMethods():
         return res
 
     def read_status_pin(self, pin):
-        return GPIO.input(pin)
+        return bool(GPIO.input(pin))
 
     def switch_pop(self, boolean = 1):
         if boolean:
@@ -145,27 +147,35 @@ class PiMethods():
         for f in decrespone['func']:
             exec(f)
 
-    def uicosfi_package(self, encrypt=True):
-        pack2send = dict()
+    def pop_status(self):
+    	pins_status = dict()
+    	for key, val in GPIO_PIN_IN.items():
+    		pins_status[key] = self.read_status_pin(val)
+
+    	return {
+        	'status': pins_status,
+        	'token': self.TOKEN,
+        	'last_update': str(datetime.now()),
+        	'temperature': self.sensor_reading()
+        }
+
+    def data_powermeter(self):
         pminfo = self.getrec("powermeter")
-
-        pins_status = dict()
-
         uicosfi = [self.register_reading(count=2, **d) for d in pminfo]
-        pack2send["data"] = uicosfi
-        pack2send["token"] = self.TOKEN
-        pack2send["temperature"] = self.sensor_reading()
-        pack2send["createAt"] = str(datetime.now())
-        for key, val in GPIO_PIN_IN.items():
-            pins_status[key] = self.read_status_pin(val)
+        now = str(datetime.now())
+        for record in uicosfi:
+            record.update({ 'createAt':  now})
 
-        pack2send.update({ 'status': pins_status })
+        return {
+        	'data': uicosfi,
+        	'token': self.TOKEN
+        }
 
-
+    def process_data(self, data, encrypt=True):
         if encrypt:
-            return self.CIPHER.encrypt(json.dumps(pack2send).encode())
+            return self.CIPHER.encrypt(json.dumps(data).encode())
 
-        return json.dumps(pack2send)
+        return json.dumps(data)
 
     def get_modbus_path(self):
         shell_path = self.CWD + '/mbdevice.sh'

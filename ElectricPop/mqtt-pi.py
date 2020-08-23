@@ -1,5 +1,5 @@
 from module.IoTClient import PiMethods
-import json, time, os, logging
+import json, time, os, logging, requests
 import asyncio
 import signal
 import uvloop
@@ -11,6 +11,10 @@ STOP = asyncio.Event()
 
 PI = PiMethods()
 TOKEN = PI.TOKEN
+HOST = PI.HOST
+PORT = PI.PORT
+
+URL = f'http://{HOST}:{PORT}'
 
 
 topic_status = f'pop/{TOKEN}/status'
@@ -35,7 +39,7 @@ def on_disconnect(client, packet, exc=None):
 def on_subscribe(client, mid, qos, properties):
     print('SUBSCRIBED')
 
-def on_message(client, topic, payload, qos, properties):
+async def on_message(client, topic, payload, qos, properties):
     print(f"Message arrive from {topic} ")
     data = json.loads(PI.CIPHER.decrypt(payload))
     PI.recv_package(data)
@@ -43,8 +47,14 @@ def on_message(client, topic, payload, qos, properties):
 
 async def push_data(client):
     while True:
-        packs = PI.uicosfi_package()
-        client.publish(topic_data, payload=packs, qos=1, message_expiry_interval=20)
+        data_powermeter = PI.process_data(PI.data_powermeter())
+        pop_status = PI.process_data(PI.pop_status())
+        try:
+            post_data = requests.post(f'{URL}/data/push', data={ 'message': data_powermeter })
+            post_status = requests.post(f'{URL}/pops/status', data={ 'message': pop_status })
+        except Exception as err:
+            print(err)
+
         await asyncio.sleep(5)
         
         
