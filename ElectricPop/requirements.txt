@@ -6,3 +6,5 @@ gmqtt
 asyncio
 uvloop
 redis
+Adafruit_DHT
+requests

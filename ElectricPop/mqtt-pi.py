@@ -30,8 +30,8 @@ def on_connect(client, flags, rc, properties):
     print(f"connected OK Returned code={rc}")
     print(f'subscribing topic {topic_execute} ...')
     status = json.dumps({'connected': True, 'token': TOKEN})
-    client.publish(topic_status, payload=status, qos=2, retain=1, message_expiry_interval=20)
-    client.subscribe(topic_execute, qos=1)
+    client.publish(topic_status, payload=status, qos=1, retain=1, message_expiry_interval=20)
+    client.subscribe(topic_execute, qos=1, retain=1)
 
 def on_disconnect(client, packet, exc=None):
     print('Disconnected')
@@ -62,7 +62,7 @@ async def main():
     # LWT
     status_lwt = json.dumps({'connected': False, 'token': TOKEN})
 
-    will_message = Message(topic_status, status_lwt, qos=2, retain=1, will_delay_interval=10)
+    will_message = Message(topic_status, status_lwt, qos=1, retain=1, will_delay_interval=10)
 
     # Main client
     client = MQTTClient(client_id=TOKEN, will_message=will_message)
