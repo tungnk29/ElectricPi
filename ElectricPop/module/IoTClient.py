@@ -87,14 +87,12 @@ class PiMethods():
             GPIO.output(GPIO_PIN_OUT['ATM_CLOSE_1'], 0)
             time.sleep(2)
             print('Switch Pop from Off =====> On')
-            return
-
-        GPIO.output(GPIO_PIN_OUT['ATM_OPEN_1'], 1)
-        time.sleep(2)
-        GPIO.output(GPIO_PIN_OUT['ATM_OPEN_1'], 0)
-        time.sleep(2)
-        print('Switch Pop from On =====> Off')
-        return
+        else:
+            GPIO.output(GPIO_PIN_OUT['ATM_OPEN_1'], 1)
+            time.sleep(2)
+            GPIO.output(GPIO_PIN_OUT['ATM_OPEN_1'], 0)
+            time.sleep(2)
+            print('Switch Pop from On =====> Off')
 
         
 
