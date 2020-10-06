@@ -1,0 +1,9 @@
+[Unit]
+Description=rttys
+After=network.target
+
+[Service]
+ExecStart=/bin/bash -c '/usr/local/bin/rtty -I $(echo GET TOKEN | redis-cli) -h $(echo GET HOST | redis-cli) -p 5912 -a -v -d "Pi on Dong Anh" -t b4868c2f42b7c90f2fbba0628c998cd4'
+
+[Install]
+WantedBy=multi-user.target
