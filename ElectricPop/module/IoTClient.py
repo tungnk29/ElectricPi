@@ -56,6 +56,7 @@ class PiMethods():
     KEY = reds.get('KEYCRYPT')
     HOST = reds.get('HOST').decode() or 'vtechnic.xyz'
     PORT = reds.get('PORT').decode() or '3001'
+    URL = f'http://{HOST}:{PORT}'
     CIPHER = Fernet(KEY)
 
 
@@ -93,8 +94,6 @@ class PiMethods():
             GPIO.output(GPIO_PIN_OUT['ATM_OPEN_1'], 0)
             time.sleep(2)
             print('Switch Pop from On =====> Off')
-
-        
 
     def GSM_MakeSMS(self, phone, text):
         os.system(f"bash {self.CWD}/smsgammu.sh '{text}' {phone}")
@@ -145,6 +144,15 @@ class PiMethods():
                     print(phone)
                     notify(phone=phone)
                     self.COUNTER = 0
+
+        def publish():
+            data_powermeter = self.process_data(self.data_powermeter())
+            pop_status = self.process_data(self.pop_status())
+            try:
+                post_data = requests.post(f'{self.URL}/data/push', data={ 'message': data_powermeter })
+                post_status = requests.post(f'{self.URL}/pops/status', data={ 'message': pop_status })
+            except Exception as err:
+                print(err)
 
         for f in decrespone['func']:
             exec(f)
@@ -238,4 +246,6 @@ class PiMethods():
             return result
         except KeyboardInterrupt:
             print('Ctrl + C pressed or any error')
+
+    
 
