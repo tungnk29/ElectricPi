@@ -1,65 +1,85 @@
-from paho.mqtt import client as mqtt_client
+from module.pmread import register_reading, sensor_reading
+from cryptography.fernet import Fernet
+from datetime import datetime
+from threading import Thread
 from module.IoTClient import PiMethods
 import json, time, requests
+import paho.mqtt.client as mqtt
+
 
 PI = PiMethods()
 TOKEN = PI.TOKEN
 HOST = PI.HOST
-PORT = PI.PORT
-
-URL = f'http://{HOST}:{PORT}'
 
 broker_port = 1883
+
+rc_message = [
+        'Connection successful',
+        'Connection refused – incorrect protocol version',
+        'Connection refused – invalid client identifier',
+        'Connection refused – server unavailable',
+        'Connection refused – bad username or password',
+        'Connection refused – not authorised'
+    ]
+
 
 topic_status = f'pop/{TOKEN}/status'
 topic_execute = f'pop/{TOKEN}/execute'
 topic_data = f'pop/{TOKEN}/data'
 
-def connect_mqtt():
-    def on_connect(client, userdata, flags, rc):
-        if rc == 0:
-            print("Connected to MQTT Broker!")
-            print(f'subscribing topic {topic_execute} ...')
-            status = json.dumps({'connected': True, 'token': TOKEN})
-            client.publish(topic_status, payload=status, qos=1, retain=1)
-            # client.subscribe(topic_execute, qos=1, retain=1)
-        else:
-            print("Failed to connect, return code %d\n", rc)
+def on_publish(client, obj, mid):
+    print("mid: " + str(mid))
 
-    status_lwt = json.dumps({'connected': False, 'token': TOKEN})
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        client.connected_flag = True #set flag
+        print("connected OK Returned code=",rc)
 
-    client = mqtt_client.Client(TOKEN)
-    client.username_pw_set(TOKEN, TOKEN)
-    client.on_connect = on_connect
-    client.will_set(topic, payload=status_lwt, qos=1, retain=True)
-    client.connect(HOST, broker_port)
-    return client
+        status = json.dumps({'connected': True, 'token': TOKEN})
+        client.publish(topic_status, payload=status, qos=1, retain=1)
 
-def subscribe(client):
-    def on_message(client, userdata, msg):
-        print(f"Message arrive from {topic} ")
+        return
+        
+    print("Bad connection Returned code= ",rc)
+    client.bad_connection_flag = True
+
+def on_disconnect(client, userdata, rc):
+    print("Client got disconnected!")
+    print(rc, ': ', rc_message[rc])
+
+    client.connected_flag = False
+    client.disconnect_flag = True
+
+def on_message(mosq, obj, msg):    
+    if (msg.topic == topic_execute or msg.topic == topic_data):
+        print("Message arrive  from %s " % msg.topic)
         data = json.loads(PI.CIPHER.decrypt(msg.payload))
         PI.recv_package(data)
 
-    client.subscribe(topic_execute)
-    client.on_message = on_message
+def on_subscribe(client, userdata, mid, granted_qos):
+    print(f'subscribed topic with data: {userdata} ')
 
-def publish():
-    while True:
-        time.sleep(5)
-        data_powermeter = PI.process_data(PI.data_powermeter())
-        pop_status = PI.process_data(PI.pop_status())
-        try:
-            post_data = requests.post(f'{URL}/data/push', data={ 'message': data_powermeter })
-            post_status = requests.post(f'{URL}/pops/status', data={ 'message': pop_status })
-        except Exception as err:
-            print(err)
+# Init client mqtt
+client = mqtt.Client(TOKEN)
+client.username_pw_set(TOKEN, TOKEN)
 
-def run():
-    client = connect_mqtt()
-    subscribe(client)
-    client.loop_forever()
+# LWT
+status_lwt = json.dumps({'connected': False, 'token': TOKEN})
+client.will_set(topic_status, payload=status_lwt, qos=1, retain=True)
 
-if __name__ == '__main__':
-    run()
+# Callback
+client.on_connect = on_connect
+client.on_disconnect = on_disconnect
+client.on_message = on_message
+client.on_publish = on_publish
+client.on_subscribe = on_subscribe
+
+# Connect & Subscribe
+client.connect(HOST, broker_port, keepalive=10)
+client.subscribe([(topic_execute, qos=1), (topic_data, 0)])
+
+client.loop_forever()
+
+
+
 
