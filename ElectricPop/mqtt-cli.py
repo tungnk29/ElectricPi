@@ -1,4 +1,3 @@
-from module.pmread import register_reading, sensor_reading
 from cryptography.fernet import Fernet
 from datetime import datetime
 from threading import Thread
@@ -25,7 +24,7 @@ rc_message = [
 
 topic_status = f'pop/{TOKEN}/status'
 topic_execute = f'pop/{TOKEN}/execute'
-topic_data = f'pop/{TOKEN}/data'
+topic_data = 'pop/push/data'
 
 def on_publish(client, obj, mid):
     print("mid: " + str(mid))
@@ -37,6 +36,7 @@ def on_connect(client, userdata, flags, rc):
 
         status = json.dumps({'connected': True, 'token': TOKEN})
         client.publish(topic_status, payload=status, qos=1, retain=1)
+        client.subscribe([(topic_execute, 1), (topic_data, 0)])
 
         return
         
@@ -76,7 +76,7 @@ client.on_subscribe = on_subscribe
 
 # Connect & Subscribe
 client.connect(HOST, broker_port, keepalive=10)
-client.subscribe([(topic_execute, qos=1), (topic_data, 0)])
+# client.subscribe([(topic_execute, 1), (topic_data, 0)])
 
 client.loop_forever()
 

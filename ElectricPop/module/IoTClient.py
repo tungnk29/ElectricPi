@@ -5,7 +5,7 @@ from pymodbus.payload import BinaryPayloadDecoder
 from cryptography.fernet import Fernet
 from redis import Redis
 from datetime import datetime
-import socket, os, subprocess, psutil, time, pickle, json
+import requests, socket, os, subprocess, psutil, time, pickle, json
 import sqlite3 as sql
 import Adafruit_DHT as DHT
 
@@ -56,7 +56,7 @@ class PiMethods():
     KEY = reds.get('KEYCRYPT')
     HOST = reds.get('HOST').decode() or 'vtechnic.xyz'
     PORT = reds.get('PORT').decode() or '3001'
-    URL = f'http://{HOST}:{PORT}'
+    URL = reds.get('API_URL').decode() 
     CIPHER = Fernet(KEY)
 
 
