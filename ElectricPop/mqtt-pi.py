@@ -3,7 +3,7 @@ import json, time, os, logging, requests
 import asyncio
 import signal
 import uvloop
-from gmqtt import Message, Client as MQTTClient
+from gmqtt import Subscription, Message, Client as MQTTClient
 # from gmqtt.mqtt.constants import MQTTv311
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -19,7 +19,7 @@ URL = f'http://{HOST}:{PORT}'
 
 topic_status = f'pop/{TOKEN}/status'
 topic_execute = f'pop/{TOKEN}/execute'
-topic_data = f'pop/{TOKEN}/data'
+topic_data = 'pop/push/data'
 
 
 def ask_exit(*args):
@@ -31,7 +31,8 @@ def on_connect(client, flags, rc, properties):
     print(f'subscribing topic {topic_execute} ...')
     status = json.dumps({'connected': True, 'token': TOKEN})
     client.publish(topic_status, payload=status, qos=1, retain=1, message_expiry_interval=20)
-    client.subscribe(topic_execute, qos=1, retain=1)
+    # client.subscribe(topic_execute, qos=1, retain=1)
+    sub_client.subscribe([gmqtt.Subscription(topic_execute, qos=1), gmqtt.Subscription(topic_data, qos=0)], subscription_identifier=2)
 
 def on_disconnect(client, packet, exc=None):
     print('Disconnected')
@@ -44,18 +45,6 @@ async def on_message(client, topic, payload, qos, properties):
     data = json.loads(PI.CIPHER.decrypt(payload))
     PI.recv_package(data)
 
-
-async def push_data(client):
-    while True:
-        data_powermeter = PI.process_data(PI.data_powermeter())
-        pop_status = PI.process_data(PI.pop_status())
-        try:
-            post_data = requests.post(f'{URL}/data/push', data={ 'message': data_powermeter })
-            post_status = requests.post(f'{URL}/pops/status', data={ 'message': pop_status })
-        except Exception as err:
-            print(err)
-
-        await asyncio.sleep(5)
         
         
 async def main():
@@ -66,6 +55,7 @@ async def main():
 
     # Main client
     client = MQTTClient(client_id=TOKEN, will_message=will_message)
+    client.set_config({'reconnect_retries': 10, 'reconnect_delay': 60})
 
     client.on_connect = on_connect
     client.on_disconnect = on_disconnect
@@ -75,7 +65,7 @@ async def main():
     client.set_auth_credentials(TOKEN, TOKEN)
     await client.connect('vscada.ddns.net', 1883,)
 
-    loop.create_task(push_data(client))
+    # loop.create_task(push_data(client))
 
     await STOP.wait()
     await client.disconnect(reason_code=4, reason_string="Smth went wrong")
