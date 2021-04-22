@@ -32,7 +32,7 @@ def on_connect(client, flags, rc, properties):
     status = json.dumps({'connected': True, 'token': TOKEN})
     client.publish(topic_status, payload=status, qos=1, retain=1, message_expiry_interval=20)
     # client.subscribe(topic_execute, qos=1, retain=1)
-    client.subscribe([gmqtt.Subscription(topic_execute, qos=1), gmqtt.Subscription(topic_data, qos=0)], subscription_identifier=2)
+    client.subscribe([Subscription(topic_execute, qos=1), Subscription(topic_data, qos=0)], subscription_identifier=2)
 
 def on_disconnect(client, packet, exc=None):
     print('Disconnected')
