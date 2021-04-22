@@ -8,3 +8,5 @@ uvloop
 redis
 Adafruit_DHT
 requests
+rdbtools 
+python-lzf
