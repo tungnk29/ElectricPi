@@ -36,7 +36,7 @@ def on_connect(client, userdata, flags, rc):
 
         status = json.dumps({'connected': True, 'token': TOKEN})
         client.publish(topic_status, payload=status, qos=1, retain=1)
-        client.subscribe([(topic_execute, 1), (topic_data, 0)])
+        client.subscribe([(topic_execute, 2), (topic_data, 0)])
 
         return
         
@@ -75,7 +75,7 @@ client.on_publish = on_publish
 client.on_subscribe = on_subscribe
 
 # Connect & Subscribe
-client.connect(HOST, broker_port, keepalive=10)
+client.connect(HOST, broker_port, keepalive=60)
 # client.subscribe([(topic_execute, 1), (topic_data, 0)])
 
 client.loop_forever()

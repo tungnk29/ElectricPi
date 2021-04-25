@@ -32,7 +32,7 @@ def on_connect(client, flags, rc, properties):
     status = json.dumps({'connected': True, 'token': TOKEN})
     client.publish(topic_status, payload=status, qos=1, retain=1, message_expiry_interval=20)
     # client.subscribe(topic_execute, qos=1, retain=1)
-    client.subscribe([Subscription(topic_execute, qos=1), Subscription(topic_data, qos=0)], subscription_identifier=2)
+    client.subscribe([Subscription(topic_execute, qos=2), Subscription(topic_data, qos=0)], subscription_identifier=2)
 
 def on_disconnect(client, packet, exc=None):
     print('Disconnected')
@@ -63,12 +63,12 @@ async def main():
     client.on_subscribe = on_subscribe
 
     client.set_auth_credentials(TOKEN, TOKEN)
-    await client.connect('vscada.ddns.net', 1883,)
+    await client.connect(HOST, 1883,)
 
     # loop.create_task(push_data(client))
 
     await STOP.wait()
-    await client.disconnect(reason_code=4, reason_string="Smth went wrong")
+    await client.disconnect(reason_code=4, reason_string="Something went wrong!")
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()

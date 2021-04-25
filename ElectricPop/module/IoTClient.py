@@ -154,8 +154,13 @@ class PiMethods():
             except Exception as err:
                 print(err)
 
-        for f in decrespone['func']:
-            exec(f)
+        # for f in decrespone['func']:
+        #     exec(f)
+
+        if decrespone.get('switch') != None:
+            switch()
+        if decrespone.get('publish') != None:
+            publish()
 
     def pop_status(self):
     	pins_status = dict()

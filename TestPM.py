@@ -2,13 +2,6 @@
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadDecoder
-from urllib.request import urlopen
-from time import sleep
-import argparse
-
-parser = argparse.ArgumentParser()
-parser.add_argument('-k', '--key', help='Key to update to ThingSpeak', type=str, default="ABSIIX9HV6M4F70X")
-token = parser.parse_args().key
 
 def validator(instance):
     if not instance.isError():
@@ -41,19 +34,7 @@ def main():
     except AttributeError as e:
         print(e)
         return None
-    
-def tspeakup():
-    while True:
-        try:
-            url = "https://api.thingspeak.com/update?api_key={}&field1={}&field2={}&field3={}&field4={}".format(token, *main())
-            urlopen(url)
-            print("Updated !")
-            print("Sleep in 30 s")
-            print("-"*30)
-            sleep(30)
-        except:
-            print("Fail to update to ThingSpeak. Try to Input Key!")
-            sleep(3)    
+       
 
 if __name__ == "__main__":
     main()
