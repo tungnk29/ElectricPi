@@ -171,7 +171,7 @@ class PiMethods():
         	'status': pins_status,
         	'token': self.TOKEN,
         	'last_update': str(datetime.now()),
-        	'temperature': self.sensor_reading()
+         	'temperature': self.sensor_reading()
         }
 
     def data_powermeter(self):
@@ -213,7 +213,7 @@ class PiMethods():
 
     def sensor_reading(self, sensor=False):
         if not sensor:
-            return psutil.sensors_temperatures()['cpu-thermal'][0].current
+            return psutil.sensors_temperatures()['cpu_thermal'][0].current
 
         humidity,temperature = Adafruit_DHT.read_retry(DHT.DHT11, 14)
         return temperature
