@@ -5,7 +5,8 @@ from pymodbus.payload import BinaryPayloadDecoder
 from cryptography.fernet import Fernet
 from redis import Redis
 from datetime import datetime
-import requests, socket, os, subprocess, psutil, time, pickle, json
+from gpiozero import CPUTemperature
+import requests, socket, os, subprocess, time, pickle, json
 import sqlite3 as sql
 import Adafruit_DHT as DHT
 
@@ -149,8 +150,10 @@ class PiMethods():
             data_powermeter = self.process_data(self.data_powermeter())
             pop_status = self.process_data(self.pop_status())
             try:
-                post_data = requests.post(f'{self.URL}/data/push', data={ 'message': data_powermeter })
-                post_status = requests.post(f'{self.URL}/pops/status', data={ 'message': pop_status })
+                # post_data = requests.post(f'{self.URL}/data/push', data={ 'message': data_powermeter })
+                # post_status = requests.post(f'{self.URL}/pops/status', data={ 'message': pop_status })
+                os.system(f"curl -X POST -d message={pop_status.decode()} {self.URL}/pops/status &")
+                os.system(f"curl -X POST -d message={data_powermeter.decode()} {self.URL}/data/push &")
             except Exception as err:
                 print(err)
 
@@ -213,7 +216,8 @@ class PiMethods():
 
     def sensor_reading(self, sensor=False):
         if not sensor:
-            return psutil.sensors_temperatures()['cpu_thermal'][0].current
+            cpu = CPUTemperature()
+            return cpu.temperature
 
         humidity,temperature = Adafruit_DHT.read_retry(DHT.DHT11, 14)
         return temperature
@@ -233,7 +237,7 @@ class PiMethods():
         return 0
 
     def register_reading(self, count, **kwargs):
-        print("Start reading Power Meter...")
+        print(f"{datetime.now()} Start reading Power Meter...")
         kwargs.pop('id')
         result = {
             'ids': kwargs.pop('ids')

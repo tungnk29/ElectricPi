@@ -60,7 +60,7 @@ def on_subscribe(client, userdata, mid, granted_qos):
     print(f'subscribed topic with data: {userdata} ')
 
 # Init client mqtt
-client = mqtt.Client(TOKEN)
+client = mqtt.Client(client_id=f'{TOKEN}{datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}', clean_session=True)
 client.username_pw_set(TOKEN, TOKEN)
 
 # LWT
