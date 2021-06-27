@@ -13,20 +13,20 @@ import Adafruit_DHT as DHT
 reds = Redis(host='localhost', port=6379, db=0)
 
 class Public():
-    
-    CWD = os.path.dirname(os.path.realpath(__file__))
-    DBPATH = self.CWD + "/config.db"
+    def __init__(self):
+        self.CWD = os.path.dirname(os.path.realpath(__file__))
+        self.DBPATH = self.CWD + "/config.db"
 
-    TOKEN = reds.get('TOKEN').decode()
-    KEY = reds.get('KEYCRYPT')
-    HOST = reds.get('HOST').decode() or 'vinsys.vn'
-    PORT = reds.get('PORT').decode() or '3001'
-    URL = reds.get('API_URL').decode() 
-    CIPHER = Fernet(self.KEY)
+        self.TOKEN = reds.get('TOKEN').decode()
+        self.KEY = reds.get('KEYCRYPT')
+        self.HOST = reds.get('HOST').decode() or 'vinsys.vn'
+        self.PORT = reds.get('PORT').decode() or '3001'
+        self.URL = reds.get('API_URL').decode() 
+        self.CIPHER = Fernet(self.KEY)
 
-    COUNTER = 0
-    CONNECT_COUNTER = 0
-    PHONE = ''
+        self.COUNTER = 0
+        self.CONNECT_COUNTER = 0
+        self.PHONE = ''
 
     def getrec(self, table, mode=False):
         db = sql.connect(self.DBPATH)
@@ -142,11 +142,10 @@ class Public():
         except KeyboardInterrupt:
             print('Ctrl + C pressed or any error')
 
-
 class PiMethods(Public):
 
     def __init__(self):
-        GPIO_PIN_IN = {
+        self.GPIO_PIN_IN = {
             'RMU_C_II': 2,
             'RMU_C_FUSE_CB': 3,
             'RMU_C_Out': 4,
@@ -161,7 +160,7 @@ class PiMethods(Public):
             'DOOR_F_ALaRM': 13,
         }
 
-        GPIO_PIN_OUT = {
+        self.GPIO_PIN_OUT = {
             'ATM_CLOSE_1': 17,
             'ATM_CLOSE_2': 18,
             'ATM_OPEN_1': 19,
@@ -259,8 +258,4 @@ class PiMethods(Public):
         	'last_update': str(datetime.now()),
          	'temperature': self.sensor_reading()
         }
-
-
-
-    
 
