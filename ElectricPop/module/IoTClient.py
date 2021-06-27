@@ -145,40 +145,43 @@ class Public():
 
 class PiMethods(Public):
 
-    GPIO_PIN_IN = {
-        'RMU_C_II': 2,
-        'RMU_C_FUSE_CB': 3,
-        'RMU_C_Out': 4,
-        'RMU_P_Air_Low': 5,
-        'RMU_F_Cable_SMS': 6,
-        'MBA_P_HIGHT': 7,
-        'MBA_Oil_HIGHT': 8,
-        'MBA_Oil_LOW': 9,
-        'MBA_T_Over': 10,
-        'MBA_SPARE': 11,
-        'ATM_LV_CI_OP': 12,
-        'DOOR_F_ALaRM': 13,
-    }
+    def __init__(self):
+        GPIO_PIN_IN = {
+            'RMU_C_II': 2,
+            'RMU_C_FUSE_CB': 3,
+            'RMU_C_Out': 4,
+            'RMU_P_Air_Low': 5,
+            'RMU_F_Cable_SMS': 6,
+            'MBA_P_HIGHT': 7,
+            'MBA_Oil_HIGHT': 8,
+            'MBA_Oil_LOW': 9,
+            'MBA_T_Over': 10,
+            'MBA_SPARE': 11,
+            'ATM_LV_CI_OP': 12,
+            'DOOR_F_ALaRM': 13,
+        }
 
-    GPIO_PIN_OUT = {
-        'ATM_CLOSE_1': 17,
-        'ATM_CLOSE_2': 18,
-        'ATM_OPEN_1': 19,
-        'ATM_OPEN_2': 20
-    }
+        GPIO_PIN_OUT = {
+            'ATM_CLOSE_1': 17,
+            'ATM_CLOSE_2': 18,
+            'ATM_OPEN_1': 19,
+            'ATM_OPEN_2': 20
+        }
 
-    try:
-        import RPi.GPIO as GPIO
-        # Setup GPIO mode
-        self.GPIO.setmode(self.GPIO.BCM)
-        self.GPIO.setwarnings(False)
+        try:
+            import RPi.GPIO as GPIO
 
-        for val in self.GPIO_PIN_IN.values():
-            self.GPIO.setup(val, self.GPIO.IN, pull_up_down=self.GPIO.PUD_DOWN)
-        for val in self.GPIO_PIN_OUT.values():
-            self.GPIO.setup(val, self.GPIO.OUT)
-    except:
-        pass
+            self.GPIO = GPIO()
+            # Setup GPIO mode
+            self.GPIO.setmode(self.GPIO.BCM)
+            self.GPIO.setwarnings(False)
+
+            for val in self.GPIO_PIN_IN.values():
+                self.GPIO.setup(val, self.GPIO.IN, pull_up_down=self.GPIO.PUD_DOWN)
+            for val in self.GPIO_PIN_OUT.values():
+                self.GPIO.setup(val, self.GPIO.OUT)
+        except:
+            pass
 
     def read_status_pin(self, pin):
         return bool(self.GPIO.input(pin))
