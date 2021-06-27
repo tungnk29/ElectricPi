@@ -1,13 +1,14 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, redirect, url_for, request, json
-from module.funcs import sensor_reading, is_connected
+from redis import Redis
 import sqlite3 as sql
 import os, re
 app = Flask(__name__)
 
 cwd = os.path.dirname(os.path.realpath(__file__))
 dbpath = cwd + "/module/config.db"
+reds = Redis(host='localhost', port=6379, db=0)
 
 def getrec(table, mode = False):
     db = sql.connect(dbpath)
@@ -25,22 +26,21 @@ def getrec(table, mode = False):
 
 @app.route("/")
 def index():
-    table = getrec("config", True)
-    server = table["server"]
-    port = table["port"]
-    token = table["token"]
+    server = reds.get('HOST').decode()
+    port = reds.get('PORT').decode()
+    token = reds.get('TOKEN').decode()
 
     pmtab = getrec("powermeter")
 
-    temperature = sensor_reading()
-    connected = is_connected()
+    temperature = None
+    connected = None
 
     return render_template("config.html", **locals())
 
 @app.route("/srvsetup", methods=["POST"])
 def srvsetup():
-    db = sql.connect(dbpath)
-    mouse = db.cursor()
+    # db = sql.connect(dbpath)
+    # mouse = db.cursor()
     dictfrm = dict(request.form)
     print(dictfrm)
 
@@ -51,12 +51,16 @@ def srvsetup():
 
     if (re.search(domainrx, dictfrm["server"]) or re.search(ipregex, dictfrm["server"])) and re.search(digitrx, dictfrm["port"]) and re.search(tokenrx, dictfrm["token"]):
         try:
-            mouse.execute("UPDATE config SET server = '{}', port = {}, token = '{}' WHERE id = 1".format(dictfrm["server"], dictfrm["port"], dictfrm["token"]))
-            db.commit()
-            print("Successful")
+            # mouse.execute("UPDATE config SET server = '{}', port = {}, token = '{}' WHERE id = 1".format(dictfrm["server"], dictfrm["port"], dictfrm["token"]))
+            # db.commit()
+            reds.set('HOST', dictfrm["server"])
+            reds.set('PORT', dictfrm["port"])
+            reds.set('TOKEN', dictfrm["token"])
+            reds.set('API_URL', dictfrm["api_url"])
+            print("Update server config successful!")
         except:
-            db.rollback()
-            print("Error")
+            # db.rollback()
+            print("Error! update config fail!")
 
     return redirect(url_for("index"))
 

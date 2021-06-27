@@ -12,54 +12,17 @@ import Adafruit_DHT as DHT
 
 reds = Redis(host='localhost', port=6379, db=0)
 
-GPIO_PIN_IN = {
-    'RMU_C_II': 2,
-    'RMU_C_FUSE_CB': 3,
-    'RMU_C_Out': 4,
-    'RMU_P_Air_Low': 5,
-    'RMU_F_Cable_SMS': 6,
-    'MBA_P_HIGHT': 7,
-    'MBA_Oil_HIGHT': 8,
-    'MBA_Oil_LOW': 9,
-    'MBA_T_Over': 10,
-    'MBA_SPARE': 11,
-    'ATM_LV_CI_OP': 12,
-    'DOOR_F_ALaRM': 13,
-}
-
-GPIO_PIN_OUT = {
-    'ATM_CLOSE_1': 17,
-    'ATM_CLOSE_2': 18,
-    'ATM_OPEN_1': 19,
-    'ATM_OPEN_2': 20
-}
-
-try:
-    import RPi.GPIO as GPIO
-    # Setup GPIO mode
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setwarnings(False)
-
-    for val in GPIO_PIN_IN.values():
-        GPIO.setup(val, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    for val in GPIO_PIN_OUT.values():
-        GPIO.setup(val, GPIO.OUT)
-except:
-    pass
-
-
-
-class PiMethods():
+class Public():
+    
     CWD = os.path.dirname(os.path.realpath(__file__))
-    DBPATH = CWD + "/config.db"
+    DBPATH = self.CWD + "/config.db"
 
     TOKEN = reds.get('TOKEN').decode()
     KEY = reds.get('KEYCRYPT')
-    HOST = reds.get('HOST').decode() or 'vtechnic.xyz'
+    HOST = reds.get('HOST').decode() or 'vinsys.vn'
     PORT = reds.get('PORT').decode() or '3001'
     URL = reds.get('API_URL').decode() 
-    CIPHER = Fernet(KEY)
-
+    CIPHER = Fernet(self.KEY)
 
     COUNTER = 0
     CONNECT_COUNTER = 0
@@ -78,23 +41,6 @@ class PiMethods():
             res = dict(rows)
         db.close()
         return res
-
-    def read_status_pin(self, pin):
-        return bool(GPIO.input(pin))
-
-    def switch_pop(self, boolean = 1):
-        if boolean:
-            GPIO.output(GPIO_PIN_OUT['ATM_CLOSE_1'], 1)
-            time.sleep(2)
-            GPIO.output(GPIO_PIN_OUT['ATM_CLOSE_1'], 0)
-            time.sleep(2)
-            print('Switch Pop from Off =====> On')
-        else:
-            GPIO.output(GPIO_PIN_OUT['ATM_OPEN_1'], 1)
-            time.sleep(2)
-            GPIO.output(GPIO_PIN_OUT['ATM_OPEN_1'], 0)
-            time.sleep(2)
-            print('Switch Pop from On =====> Off')
 
     def GSM_MakeSMS(self, phone, text):
         os.system(f"bash {self.CWD}/smsgammu.sh '{text}' {phone}")
@@ -117,66 +63,6 @@ class PiMethods():
                 text += f'I: {v["a"][0]} ({">= Imax" if v["a"][1] else "< Imin"}).'
         return text
 
-    def recv_package(self, decrespone):
-        print(decrespone)
-
-        def alarm():
-            '''Nhan lenh gui tin nhan canh bao'''
-
-            self.PHONE = decrespone["phone"]
-            print(COUNTER)
-            if decrespone.get("alarm") == True:
-                if self.COUNTER % 4 == 0 and self.COUNTER <= 12:
-                    self.GSM_MakeSMS(self.PHONE, parse_sms(decrespone['warning']))
-                    print("Canh bao nguy hiem")
-                self.COUNTER += 1
-
-        def notify(phone):
-            GSM_MakeSMS(phone, "Da het su co !")
-
-        def switch():
-            '''Dong ngat mach'''
-
-            if decrespone["switch"] != GPIO.input(GPIO_PIN_IN['ATM_LV_CI_OP']):
-                self.switch_pop(decrespone["switch"])
-
-            if not decrespone.get("alarm", 0):
-                if self.COUNTER > 0 and self.COUNTER % 4 != 0:
-                    print(phone)
-                    notify(phone=phone)
-                    self.COUNTER = 0
-
-        def publish():
-            data_powermeter = self.process_data(self.data_powermeter())
-            pop_status = self.process_data(self.pop_status())
-            try:
-                # post_data = requests.post(f'{self.URL}/data/push', data={ 'message': data_powermeter })
-                # post_status = requests.post(f'{self.URL}/pops/status', data={ 'message': pop_status })
-                os.system(f"curl -X POST -d message={pop_status.decode()} {self.URL}/pops/status &")
-                os.system(f"curl -X POST -d message={data_powermeter.decode()} {self.URL}/data/push &")
-            except Exception as err:
-                print(err)
-
-        # for f in decrespone['func']:
-        #     exec(f)
-
-        if decrespone.get('switch') != None:
-            switch()
-        if decrespone.get('publish') != None:
-            publish()
-
-    def pop_status(self):
-    	pins_status = dict()
-    	for key, val in GPIO_PIN_IN.items():
-    		pins_status[key] = self.read_status_pin(val)
-
-    	return {
-        	'status': pins_status,
-        	'token': self.TOKEN,
-        	'last_update': str(datetime.now()),
-         	'temperature': self.sensor_reading()
-        }
-
     def data_powermeter(self):
         pminfo = self.getrec("powermeter")
         uicosfi = [self.register_reading(count=2, **d) for d in pminfo]
@@ -185,8 +71,8 @@ class PiMethods():
             record.update({ 'createAt':  now})
 
         return {
-        	'data': uicosfi,
-        	'token': self.TOKEN
+            'data': uicosfi,
+            'token': self.TOKEN
         }
 
     def process_data(self, data, encrypt=True):
@@ -255,6 +141,123 @@ class PiMethods():
             return result
         except KeyboardInterrupt:
             print('Ctrl + C pressed or any error')
+
+
+class PiMethods(Public):
+
+    GPIO_PIN_IN = {
+        'RMU_C_II': 2,
+        'RMU_C_FUSE_CB': 3,
+        'RMU_C_Out': 4,
+        'RMU_P_Air_Low': 5,
+        'RMU_F_Cable_SMS': 6,
+        'MBA_P_HIGHT': 7,
+        'MBA_Oil_HIGHT': 8,
+        'MBA_Oil_LOW': 9,
+        'MBA_T_Over': 10,
+        'MBA_SPARE': 11,
+        'ATM_LV_CI_OP': 12,
+        'DOOR_F_ALaRM': 13,
+    }
+
+    GPIO_PIN_OUT = {
+        'ATM_CLOSE_1': 17,
+        'ATM_CLOSE_2': 18,
+        'ATM_OPEN_1': 19,
+        'ATM_OPEN_2': 20
+    }
+
+    try:
+        import RPi.GPIO as GPIO
+        # Setup GPIO mode
+        self.GPIO.setmode(self.GPIO.BCM)
+        self.GPIO.setwarnings(False)
+
+        for val in self.GPIO_PIN_IN.values():
+            self.GPIO.setup(val, self.GPIO.IN, pull_up_down=self.GPIO.PUD_DOWN)
+        for val in self.GPIO_PIN_OUT.values():
+            self.GPIO.setup(val, self.GPIO.OUT)
+    except:
+        pass
+
+    def read_status_pin(self, pin):
+        return bool(self.GPIO.input(pin))
+
+    def switch_pop(self, boolean = 1):
+        if boolean:
+            self.GPIO.output(self.GPIO_PIN_OUT['ATM_CLOSE_1'], 1)
+            time.sleep(2)
+            self.GPIO.output(self.GPIO_PIN_OUT['ATM_CLOSE_1'], 0)
+            time.sleep(2)
+            print('Switch Pop from Off =====> On')
+        else:
+            self.GPIO.output(self.GPIO_PIN_OUT['ATM_OPEN_1'], 1)
+            time.sleep(2)
+            self.GPIO.output(self.GPIO_PIN_OUT['ATM_OPEN_1'], 0)
+            time.sleep(2)
+            print('Switch Pop from On =====> Off')
+
+    def recv_package(self, decrespone):
+        print(decrespone)
+
+        def alarm():
+            '''Nhan lenh gui tin nhan canh bao'''
+
+            self.PHONE = decrespone["phone"]
+            print(self.COUNTER)
+            if decrespone.get("alarm") == True:
+                if self.COUNTER % 4 == 0 and self.COUNTER <= 12:
+                    self.GSM_MakeSMS(self.PHONE, parse_sms(decrespone['warning']))
+                    print("Canh bao nguy hiem")
+                self.COUNTER += 1
+
+        def notify(phone):
+            GSM_MakeSMS(phone, "Da het su co !")
+
+        def switch():
+            '''Dong ngat mach'''
+
+            if decrespone["switch"] != self.GPIO.input(self.GPIO_PIN_IN['ATM_LV_CI_OP']):
+                self.switch_pop(decrespone["switch"])
+
+            if not decrespone.get("alarm", 0):
+                if self.COUNTER > 0 and self.COUNTER % 4 != 0:
+                    print(phone)
+                    notify(phone=phone)
+                    self.COUNTER = 0
+
+        def publish():
+            data_powermeter = self.process_data(self.data_powermeter())
+            pop_status = self.process_data(self.pop_status())
+            try:
+                # post_data = requests.post(f'{self.URL}/data/push', data={ 'message': data_powermeter })
+                # post_status = requests.post(f'{self.URL}/pops/status', data={ 'message': pop_status })
+                os.system(f"curl -X POST -d message={pop_status.decode()} {self.URL}/pops/status &")
+                os.system(f"curl -X POST -d message={data_powermeter.decode()} {self.URL}/data/push &")
+            except Exception as err:
+                print(err)
+
+        # for f in decrespone['func']:
+        #     exec(f)
+
+        if decrespone.get('switch') != None:
+            switch()
+        if decrespone.get('publish') != None:
+            publish()
+
+    def pop_status(self):
+    	pins_status = dict()
+    	for key, val in self.GPIO_PIN_IN.items():
+    		pins_status[key] = self.read_status_pin(val)
+
+    	return {
+        	'status': pins_status,
+        	'token': self.TOKEN,
+        	'last_update': str(datetime.now()),
+         	'temperature': self.sensor_reading()
+        }
+
+
 
     
 

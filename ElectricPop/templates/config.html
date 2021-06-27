@@ -70,16 +70,17 @@
                     <th>IP/Domain</th>
                     <th>Port</th>
                     <th>Token</th>
+                    <th>API URL</th>
                 </tr>
                 <tr>
                     <td><input type="text" name="server" value={{ server }} placeholder="Domain/IP" class="textbox">
                     </td>
                     <td><input type="text" name="port" value={{ port }} placeholder="Port" class="textbox"></td>
                     <td><input type="text" name="token" value={{ token }} placeholder="Token" class="textbox"></td>
+                    <td><input type="text" name="api_url" value={{ api_url }} placeholder="https://api.vinsys.vn" class="textbox"></td>
                 </tr>
                 <tr>
-                    <td colspan="3" style="text-align: center;"><input type="submit" formaction="/srvsetup" value="Save"
-                                                                       class="button"></td>
+                    <td colspan="3" style="text-align: center;"><input type="submit" formaction="/srvsetup" value="Save" class="button"></td>
                 </tr>
             </table>
         </form>
