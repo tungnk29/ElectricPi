@@ -10,6 +10,16 @@ import requests, socket, os, subprocess, time, pickle, json
 import sqlite3 as sql
 import Adafruit_DHT as DHT
 
+try:
+    import RPi.GPIO as GPIO
+
+    # Setup GPIO mode
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setwarnings(False)
+
+except:
+    pass
+
 reds = Redis(host='localhost', port=6379, db=0)
 
 class Public():
@@ -168,35 +178,27 @@ class PiMethods(Public):
             'ATM_OPEN_2': 20
         }
 
-        try:
-            import RPi.GPIO as GPIO
+        for val in self.GPIO_PIN_IN.values():
+            GPIO.setup(val, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        for val in self.GPIO_PIN_OUT.values():
+            GPIO.setup(val, GPIO.OUT)
 
-            self.GPIO = GPIO()
-            # Setup GPIO mode
-            self.GPIO.setmode(self.GPIO.BCM)
-            self.GPIO.setwarnings(False)
 
-            for val in self.GPIO_PIN_IN.values():
-                self.GPIO.setup(val, self.GPIO.IN, pull_up_down=self.GPIO.PUD_DOWN)
-            for val in self.GPIO_PIN_OUT.values():
-                self.GPIO.setup(val, self.GPIO.OUT)
-        except:
-            pass
 
     def read_status_pin(self, pin):
-        return bool(self.GPIO.input(pin))
+        return bool(GPIO.input(pin))
 
     def switch_pop(self, boolean = 1):
         if boolean:
-            self.GPIO.output(self.GPIO_PIN_OUT['ATM_CLOSE_1'], 1)
+            GPIO.output(self.GPIO_PIN_OUT['ATM_CLOSE_1'], 1)
             time.sleep(2)
-            self.GPIO.output(self.GPIO_PIN_OUT['ATM_CLOSE_1'], 0)
+            GPIO.output(self.GPIO_PIN_OUT['ATM_CLOSE_1'], 0)
             time.sleep(2)
             print('Switch Pop from Off =====> On')
         else:
-            self.GPIO.output(self.GPIO_PIN_OUT['ATM_OPEN_1'], 1)
+            GPIO.output(self.GPIO_PIN_OUT['ATM_OPEN_1'], 1)
             time.sleep(2)
-            self.GPIO.output(self.GPIO_PIN_OUT['ATM_OPEN_1'], 0)
+            GPIO.output(self.GPIO_PIN_OUT['ATM_OPEN_1'], 0)
             time.sleep(2)
             print('Switch Pop from On =====> Off')
 
@@ -220,7 +222,7 @@ class PiMethods(Public):
         def switch():
             '''Dong ngat mach'''
 
-            if decrespone["switch"] != self.GPIO.input(self.GPIO_PIN_IN['ATM_LV_CI_OP']):
+            if decrespone["switch"] != GPIO.input(self.GPIO_PIN_IN['ATM_LV_CI_OP']):
                 self.switch_pop(decrespone["switch"])
 
             if not decrespone.get("alarm", 0):
