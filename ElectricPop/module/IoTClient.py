@@ -145,6 +145,7 @@ class Public():
 class PiMethods(Public):
 
     def __init__(self):
+        super(PiMethods, self).__init__()
         self.GPIO_PIN_IN = {
             'RMU_C_II': 2,
             'RMU_C_FUSE_CB': 3,
