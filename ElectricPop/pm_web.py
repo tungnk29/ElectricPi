@@ -29,6 +29,7 @@ def index():
     server = reds.get('HOST').decode()
     port = reds.get('PORT').decode()
     token = reds.get('TOKEN').decode()
+    api_url = reds.get('API_URL').decode()
 
     pmtab = getrec("powermeter")
 
