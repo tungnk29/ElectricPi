@@ -39,6 +39,12 @@ class Public():
         self.PHONE = ''
 
     def getrec(self, table, mode=False):
+        ''' 
+            Get record from table from sqlite
+            table: table name to get record
+            mode: return [{...}] if False, return {...} if True
+
+        '''
         db = sql.connect(self.DBPATH)
         db.row_factory = sql.Row
         mouse = db.cursor()
@@ -53,6 +59,7 @@ class Public():
         return res
 
     def GSM_MakeSMS(self, phone, text):
+        ''' Send SMS tool '''
         os.system(f"bash {self.CWD}/smsgammu.sh '{text}' {phone}")
 
     def parse_sms(self, content):
@@ -74,6 +81,7 @@ class Public():
         return text
 
     def data_powermeter(self):
+        ''' Read data from Powermeter '''
         pminfo = self.getrec("powermeter")
         uicosfi = [self.register_reading(count=2, **d) for d in pminfo]
         now = str(datetime.now())
@@ -86,12 +94,14 @@ class Public():
         }
 
     def process_data(self, data, encrypt=True):
+        ''' Encrypt data to send to server over HTTP API '''
         if encrypt:
             return self.CIPHER.encrypt(json.dumps(data).encode())
 
         return json.dumps(data)
 
     def get_modbus_path(self):
+        ''' Get RS485 path device to read data from Power Meter '''
         shell_path = self.CWD + '/mbdevice.sh'
 
         cmd = subprocess.Popen("bash " + shell_path, stdout=subprocess.PIPE, shell=True)
@@ -103,6 +113,7 @@ class Public():
         return '/dev/' + result.strip()
 
     def is_connected(self):
+        ''' Check network on or off '''
         try:
             client = socket.create_connection(('8.8.8.8', 53), 2)
             client.close()
@@ -111,6 +122,7 @@ class Public():
             return False
 
     def sensor_reading(self, sensor=False):
+        ''' Read temperature from Pi hardware or DHT11 sensor '''
         if not sensor:
             cpu = CPUTemperature()
             return cpu.temperature
@@ -133,6 +145,7 @@ class Public():
         return 0
 
     def register_reading(self, count, **kwargs):
+        ''' Read data from powermeter with registers value '''
         print(f"{datetime.now()} Start reading Power Meter...")
         kwargs.pop('id')
         result = {
@@ -186,9 +199,11 @@ class PiMethods(Public):
 
 
     def read_status_pin(self, pin):
+        ''' Read Raspberry Pi status Pin '''
         return bool(GPIO.input(pin))
 
     def switch_pop(self, boolean = 1):
+        ''' Close or open Electric Pop '''
         if boolean:
             GPIO.output(self.GPIO_PIN_OUT['ATM_CLOSE_1'], 1)
             time.sleep(2)
@@ -203,6 +218,7 @@ class PiMethods(Public):
             print('Switch Pop from On =====> Off')
 
     def recv_package(self, decrespone):
+        ''' Receive data response from server over MQTT protocol and execute command '''
         print(decrespone)
 
         def alarm():
@@ -232,6 +248,7 @@ class PiMethods(Public):
                     self.COUNTER = 0
 
         def publish():
+            ''' Push data to API server '''
             data_powermeter = self.process_data(self.data_powermeter())
             pop_status = self.process_data(self.pop_status())
             try:
@@ -251,6 +268,7 @@ class PiMethods(Public):
             publish()
 
     def pop_status(self):
+        ''' Read Pi status to send to API server '''
     	pins_status = dict()
     	for key, val in self.GPIO_PIN_IN.items():
     		pins_status[key] = self.read_status_pin(val)
