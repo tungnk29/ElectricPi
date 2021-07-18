@@ -2,27 +2,30 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, redirect, url_for, request, json
 from redis import Redis
+from module.IoTClient import Public, reds
 import sqlite3 as sql
 import os, re
+
 app = Flask(__name__)
+functions = Public()
 
-cwd = os.path.dirname(os.path.realpath(__file__))
-dbpath = cwd + "/module/config.db"
-reds = Redis(host='localhost', port=6379, db=0)
+# cwd = os.path.dirname(os.path.realpath(__file__))
+# dbpath = cwd + "/module/config.db"
+# reds = Redis(host='localhost', port=6379, db=0)
 
-def getrec(table, mode = False):
-    db = sql.connect(dbpath)
-    db.row_factory = sql.Row
-    mouse = db.cursor()
-    mouse.execute("SELECT * FROM {}".format(table))
-    if not mode:
-        rows = mouse.fetchall()
-        res = [dict(d) for d in rows]
-    else:
-        rows = mouse.fetchone()
-        res = dict(rows)
-    db.close()
-    return res
+# def getrec(table, mode = False):
+#     db = sql.connect(dbpath)
+#     db.row_factory = sql.Row
+#     mouse = db.cursor()
+#     mouse.execute("SELECT * FROM {}".format(table))
+#     if not mode:
+#         rows = mouse.fetchall()
+#         res = [dict(d) for d in rows]
+#     else:
+#         rows = mouse.fetchone()
+#         res = dict(rows)
+#     db.close()
+#     return res
 
 @app.route("/")
 def index():
@@ -31,10 +34,10 @@ def index():
     token = reds.get('TOKEN').decode()
     api_url = reds.get('API_URL').decode()
 
-    pmtab = getrec("powermeter")
+    pmtab = functions.getrec("powermeter")
 
-    temperature = None
-    connected = None
+    temperature = functions.sensor_reading()
+    connected = functions.is_connected()
 
     return render_template("config.html", **locals())
 
@@ -45,12 +48,11 @@ def srvsetup():
     dictfrm = dict(request.form)
     print(dictfrm)
 
-    domainrx = r"^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$"
     ipregex = r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
     digitrx = r"^\d{2,4}$"
-    tokenrx = r"^\w{16}$"
+    tokenrx = r"^\w{16,}$"
 
-    if (re.search(domainrx, dictfrm["server"]) or re.search(ipregex, dictfrm["server"])) and re.search(digitrx, dictfrm["port"]) and re.search(tokenrx, dictfrm["token"]):
+    if (re.search(ipregex, dictfrm["server"])) and re.search(digitrx, dictfrm["port"]) and re.search(tokenrx, dictfrm["token"]):
         try:
             # mouse.execute("UPDATE config SET server = '{}', port = {}, token = '{}' WHERE id = 1".format(dictfrm["server"], dictfrm["port"], dictfrm["token"]))
             # db.commit()
@@ -67,7 +69,7 @@ def srvsetup():
 
 @app.route("/save", methods=["POST"])
 def save():
-    db = sql.connect(dbpath)
+    db = sql.connect(functions.DBPATH)
     db.row_factory = sql.Row
     mouse = db.cursor()
 
@@ -102,7 +104,7 @@ def save():
 
 @app.route("/delete", methods=["POST"])
 def delete():
-    db = sql.connect(dbpath)
+    db = sql.connect(functions.DBPATH)
     mouse = db.cursor()
 
     try:
