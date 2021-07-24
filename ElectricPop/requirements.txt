@@ -1,4 +1,5 @@
 pymodbus
+gpiozero
 cryptography
 Flask
 paho-mqtt
