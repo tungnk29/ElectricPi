@@ -269,11 +269,11 @@ class PiMethods(Public):
 
     def pop_status(self):
         ''' Read Pi status to send to API server '''
-    	pins_status = dict()
-    	for key, val in self.GPIO_PIN_IN.items():
-    		pins_status[key] = self.read_status_pin(val)
+        pins_status = dict()
+        for key, val in self.GPIO_PIN_IN.items():
+            pins_status[key] = self.read_status_pin(val)
 
-    	return {
+        return {
         	'status': pins_status,
         	'token': self.TOKEN,
         	'last_update': str(datetime.now()),
