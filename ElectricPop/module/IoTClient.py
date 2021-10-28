@@ -254,8 +254,8 @@ class PiMethods(Public):
             try:
                 # post_data = requests.post(f'{self.URL}/data/push', data={ 'message': data_powermeter })
                 # post_status = requests.post(f'{self.URL}/pops/status', data={ 'message': pop_status })
-                os.system(f"curl -X POST -d message={pop_status.decode()} {self.URL}/pops/status &")
-                os.system(f"curl -X POST -d message={data_powermeter.decode()} {self.URL}/data/push &")
+                os.system(f"curl -k -X POST -d message={pop_status.decode()} {self.URL}/pops/status &")
+                os.system(f"curl -k -X POST -d message={data_powermeter.decode()} {self.URL}/data/push &")
             except Exception as err:
                 print(err)
 
